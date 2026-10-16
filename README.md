@@ -1,63 +1,51 @@
-# CRM Mailotion — Mes boutiques
+# CRM Mailotion — assistant commercial connecté (v2)
 
-CRM mobile simple pour contacter les boutiques e-commerce et suivre la progression de **premier contact → aide gratuite → offre payante → cliente**.
+Application mobile PWA pour gérer les boutiques e-commerce, les échanges, les relances, les audits gratuits, les propositions et les clients payants. Le design violet et la navigation du CRM d'origine sont conservés.
 
-## Ouvrir l'application
+## Ouvrir le CRM
 
-Une fois **GitHub Pages activé**, l'adresse sera :
+GitHub Pages : https://ludodulac.github.io/CRM-mailotion/
 
-**https://ludodulac.github.io/CRM-mailotion/**
+Pour l'installer sur Android : ouvrir ce lien dans Chrome → ⋮ → **Ajouter à l'écran d'accueil** (ou **Installer**).
 
-Dans GitHub → **Settings → Pages** : **Deploy from a branch** → branche **main**, dossier **/(root)** → Save. Sur Chrome Android, menu **⋮ → Ajouter à l'écran d'accueil** / **Installer l'application**.
+## Nouvelles fonctions
 
-## Fonctionnalités
+- Page **AUJOURD'HUI** : priorités, relances dues/en retard, contacts à faire, prestations gratuites et offres en attente.
+- Fiche boutique : site, secteur, ville, contact, coordonnées, source, vérification, outil email, problèmes, opportunités, priorité, qualification, statut, audit, propositions, notes.
+- Historique chronologique : événements et tâches datées, reportables et terminables.
+- Historique des emails : trouvé non testé, confirmé, invalide ou alternatif à tester. Un email invalide n'est jamais proposé comme destinataire.
+- Sauvegarde complète JSON (prospects + actions + historique d'emails), import/export existant conservé.
+- Fonctionnement local/hors ligne avec copie des données du navigateur.
+- **Mode connecté en option** : Google Sheets privé avec OAuth Google, lisible/modifiable par ChatGPT via Google Drive.
 
-- Ajouter/modifier/supprimer des boutiques, email, téléphone, site, ville, secteur, interlocuteur.
-- Contacter par **Email / Appeler / Site** en un clic.
-- Étapes : à contacter, contactée, en discussion, aide gratuite, offre payante, cliente, sans suite.
-- Date de relance, recherche et filtres, notes personnelles, offre et montant facultatifs.
-- Sauvegarde **automatique dans le navigateur de l'appareil** ; export CSV et sauvegarde/restauration JSON.
-- Application PWA, consultable hors ligne après la première visite.
+## Architecture sécurisée
 
-## Ajouter des boutiques depuis une autre conversation ChatGPT
+- **Dépôt public GitHub** : code, PWA, exemples et coordonnées professionnelles publiques uniquement. **Aucune note privée, historique, token, clé ou mot de passe.**
+- **Google Sheets privé « MAILOTION — CRM privé connecté à ChatGPT »** : trois onglets **Prospects, Actions, Emails** + Meta. Il n'est partagé avec personne, vérifié par les permissions de Google Drive.
+- **Téléphone** : conserve son stockage existant `mailotion-crm-v1`. L'historique des actions et des emails est enregistré localement avant la connexion. Un snapshot de migration est conservé en `mailotion-precloud-snapshot-v2`.
+- **OAuth Google** : un ID client OAuth web, créé dans Google Cloud ; l'application conserve cet ID (non secret) et le numéro du Google Sheets sur le téléphone. **Le jeton OAuth ne reste qu'en mémoire** jusqu'à expiration.
+- **ChatGPT** : le connecteur Google Drive, déjà utilisable sur le compte ChatGPT, permet de rechercher et lire le classeur privé puis de modifier les lignes par les actions Google Sheets. Voir [SCHEMA-CHATGPT.md](SCHEMA-CHATGPT.md) pour les formats exacts et les contrôles nécessaires.
 
-L'app recharge `prospects.json` au démarrage, et avec le bouton **Actualiser**. Une conversation ChatGPT disposant de l'accès GitHub au dépôt peut ajouter des contacts professionnels publics dans ce fichier. Format :
+## Première connexion Google (intervention humaine obligatoire)
 
-```json
-{
-  "version": 1,
-  "boutiques": [
-    {
-      "id": "boutique-exemple-brest",
-      "boutique": "Nom de boutique",
-      "ville": "Brest",
-      "secteur": "Cosmétiques",
-      "email": "contact@exemple.fr",
-      "telephone": "02 00 00 00 00",
-      "site": "https://exemple.fr",
-      "source_url": "https://exemple.fr/contact"
-    }
-  ]
-}
-```
+1. Dans la console Google Cloud, choisir ou créer un projet Google, puis activer l'**API Google Sheets**.
+2. Dans Google Auth Platform / écran de consentement, configurer l'application **Mailotion CRM**, public cible **Externe** pour un compte Gmail personnel, statut **Test**, ajouter son propre email dans les **utilisateurs de test**, et déclarer le scope `https://www.googleapis.com/auth/spreadsheets`.
+3. Dans **Clients** → créer **ID client OAuth** → **Application Web** → Origines JavaScript autorisées : exactement `https://ludodulac.github.io`. Copier l'**ID client** (terminant par `.apps.googleusercontent.com`). **Aucun secret client** ne doit être saisi dans le CRM.
+4. Sur le téléphone, ouvrir le CRM, section **Mémoire partagée ChatGPT**, paramètres ⚙ : coller l'**ID client OAuth** et l'**ID de la feuille Google Sheets privée** ; enregistrer.
+5. Cliquer sur **Connecter Google**, autoriser, puis attendre l'état vert **Synchronisé**. La feuille Google privée existe déjà et contient 11 contacts publics migrés, l'historique des deux emails de Tasha (un invalide, l'alternative à tester). Les notes et le CRM du téléphone ne sont fusionnés qu'après autorisation. Cliquer sur **Connecter Google** au retour dans l'app si la session a expiré.
 
-**Consigne à copier dans ChatGPT :** « Dans `ludodulac/CRM-mailotion`, ajoute les boutiques que nous avons vérifiées dans `prospects.json`, sans retirer les anciennes, sans doublons, avec seulement les coordonnées professionnelles publiquement accessibles. Ne modifie pas les autres fichiers. »
+Le site peut être utilisé **sans configurer Google** ; dans ce cas les nouvelles actions restent **locales** et ChatGPT ne les voit pas encore. Ne pas annoncer de synchronisation opérationnelle sans avoir constaté l'état vert après login réel.
 
-### Respect de la confidentialité
+## Utiliser avec ChatGPT
 
-Le dépôt étant **public**, `prospects.json` et tous ses contacts sont **accessibles à tout le monde** sur GitHub. N'y inscris **aucune** note privée, numéro personnel, contact non public, email confidentiel, information client ou donnée de connexion. Le logiciel n'enregistre jamais ses **notes, suivis, dates de relance ou montants** dans le dépôt public : ces informations restent dans le stockage local du navigateur. Le CRM ne dispose **pas** d'une synchronisation automatique des notes entre plusieurs appareils.
+> Dans mon Google Drive, retrouve le classeur privé « MAILOTION — CRM privé connecté à ChatGPT ». Lis les onglets Prospects, Actions, Emails et les champs JSON. Fais-moi mon programme commercial d'aujourd'hui en te basant uniquement sur les données réelles. Pour tout changement, re-lis la ligne ciblée, écris la fiche/le journal sans écraser les autres, puis vérifie ta modification par une nouvelle lecture. Ne publie aucune donnée privée dans GitHub.
 
-- Ajouter depuis l'interface de l'app enregistre uniquement sur l'appareil.
-- Pour retrouver les données après changement ou réinitialisation de téléphone, utiliser **Sauvegarder tout mon CRM** puis **Restaurer une sauvegarde**.
-- Les adresses des boutiques ajoutées par ChatGPT via GitHub apparaissent à la prochaine ouverture ou en cliquant **Actualiser**.
-- L'app permet également l'import local CSV ou JSON et un lien de transfert `#import=<JSON encodé en base64url>` vers un seul téléphone, sans publication dans le dépôt.
+Les additions publiques depuis ChatGPT dans `prospects.json` restent compatibles, mais elles **ne sont pas adaptées aux notes confidentielles**. Le bouton **Actualiser** peut toujours charger ce fichier ; la synchronisation privée se fait depuis **Connecter Google**.
 
-Pas de backend, pas de statistiques d'usage, pas de mot de passe intégré. Ne publie jamais un jeton GitHub dans ces fichiers.
+## Fiabilité et limites
 
-## Limites
-
-- Les cartes et notes ajoutées ou modifiées depuis un téléphone ne sont **pas modifiées sur GitHub**.
-- Les données de contact qui arrivent depuis ChatGPT sont visibles publiquement : pour une véritable équipe multi-utilisateurs ou un carnet confidentiel synchronisé, il faudrait un stockage privé et une authentification.
-- Les champs d'étape et de notes sont conservés lors des nouveaux imports de contacts GitHub.
-
-Licence : usage personnel. 
+- Les 11 prospects publics originaux ont été copiés dans le classeur privé ; les données locales supplémentaires sont sur l'appareil et n'ont pas pu être lues à distance.
+- Le module cloud exécute lecture, fusion, écriture par lignes et **relecture après écriture**. Le connecteur ChatGPT a été testé sur le classeur privé, mais la connexion OAuth **depuis le téléphone** doit encore être vérifiée après configuration.
+- Google Sheets n'offre pas de verrouillage transactionnel dans cette implémentation : éviter d'éditer **la même fiche simultanément** depuis ChatGPT et le téléphone. En cas de conflit détecté, le CRM garde une copie locale du conflit.
+- Le dépôt public contient encore des *révisions Git historiques*. Une note privée précédemment copiée dans `prospects.json` a été retirée de la version courante, mais l'ancienne révision reste accessible tant que l'historique Git n'est pas purgé.
+- Les sauvegardes JSON contiennent les notes et données privées : **ne pas les publier sur GitHub**.
