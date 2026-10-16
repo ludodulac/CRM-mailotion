@@ -1,0 +1,28 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const read=name=>fs.readFileSync(name,'utf8');
+const html=read('index.html'),app=read('app.js'),cloud=read('crm-cloud.js');
+const ids=[...html.matchAll(/\\bid="([^"]+)"/g)].map(m=>m[1]);
+assert.equal(ids.length,new Set(ids).size,'IDs HTML uniques');
+for(const name of ['app.js','crm-cloud.js','sw.js'])new Function(read(name));
+for(const [,id] of [...app.matchAll(/\\$\\('([^']+)'\\)/g),...cloud.matchAll(/\\$\\('([^']+)'\\)/g)])assert.ok(ids.includes(id),'Champ '+id+' existe dans HTML');
+const publicData=JSON.parse(read('prospects.json'));
+assert.equal(publicData.boutiques.length,11,'Les 11 prospects publics initiaux sont conservés');
+for(const b of publicData.boutiques){assert.equal(b.notes,undefined,'Pas de notes privées dans GitHub');assert.equal(b.contact_statut,undefined,'Pas de statut privé dans GitHub');}
+const replaced=cloud.replace(/if\\(document\\.readyState==='loading'\\)document\\.addEventListener\\('DOMContentLoaded',init,\\{once:true\\}\\);else init\\(\\);\\n\\}\\)\\(\\);/, 'return {mergeRecord,deduplicate,values,fp};\\n})();');
+assert.notEqual(replaced,cloud,'Test extraction fonctions cloud');
+const store={};
+const env={localStorage:{getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v},window:{MailotionCRM:{sanitize:r=>r}}};
+const api=vm.runInNewContext(replaced,env);
+const base={id:'id-1',name:'Boutique fictive',website:'https://exemple.fr',notes:'a',priority:'moyenne',updatedAt:'2026-10-10T00:00:00Z'};
+assert.equal(api.mergeRecord('Prospects',{...base,notes:'nouveau'},base,base).notes,'nouveau','Changement ChatGPT conservé');
+assert.equal(api.mergeRecord('Prospects',base,{...base,priority:'haute'},base).priority,'haute','Changement téléphone conservé');
+assert.equal(api.mergeRecord('Prospects',{...base,notes:'cloud'},{...base,notes:'phone'},base).notes,'cloud','Conflit ne remplace pas silencieusement le cloud');
+assert.ok(store['mailotion-conflicts-v1'],'Conflit sauvegardé');
+assert.equal(api.deduplicate([{id:'a',name:'Échoppe',website:'https://www.exemple.fr'},{id:'b',name:'Echoppe',website:'https://exemple.fr'},{id:'c',name:'Autre',website:'https://autre.fr'}]).length,2,'Doublons évités');
+const values=api.values('Prospects',base);
+assert.equal(values.length,7,'Colonnes Sheets prospects');
+assert.equal(JSON.parse(values[6]).id,base.id,'JSON intact');
+const sw=read('sw.js');assert.ok(sw.includes('crm-cloud.js'),'Module cloud disponible hors ligne');
+console.log('PASS - scripts, UI, 11 contacts, données privées, merge, conflits, dédoublonnage, schéma Google Sheets.');
