@@ -106,7 +106,7 @@ L'historique est **append-only quand il s'agit d'événements distincts** : ne p
 
 Si une adresse devient invalide : écrire une nouvelle entrée `status:"invalide"`, marquer cette adresse non active, conserver les précédentes, puis mettre à jour le prospect. L'adresse alternative reste `alternatif_a_tester` jusqu'à vérification, sans jamais la déclarer fonctionnelle sans preuve.
 
-Exemple Tasha Bijoux : `contact@tasha.fr` invalide signalée, `bijoux.tasha@gmail.com` alternative à tester. Les dates inconnues restent vides.
+Exemple générique : si une première adresse est signalée invalide, conserver cette ancienne adresse comme inactive dans l’onglet Emails et enregistrer la nouvelle comme alternative à tester, sans inventer de date de vérification.
 
 ## Procédure fiable pour ChatGPT
 
