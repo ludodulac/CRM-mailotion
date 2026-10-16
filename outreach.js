@@ -2,11 +2,12 @@
 'use strict';
 // Un email à la fois. Aucun envoi automatique.
 const STORAGE='mailotion-outreach-template-v1';
-const DEFAULT_BODY="Je développe actuellement MAILOTION et je cherche\nquelques boutiques Shopify pour tester gratuitement\nmon travail.\n\nMon idée est simple : vous aider à récupérer davantage\nde ventes grâce aux paniers abandonnés et à donner\nenvie à vos clients de revenir acheter, avec des emails\nmieux pensés et adaptés à votre univers.\n\nMême si vous avez déjà des emails automatiques,\nil y a peut-être des choses à améliorer.\n\nJe vous propose de m'en occuper gratuitement,\nsans engagement. En échange, j'aimerais simplement\navoir votre avis sur le résultat.\n\nEst-ce que ça pourrait vous intéresser ?\n\nBonne journée,\nLudovic — MAILOTION";
+const DEFAULT_BODY="Je développe actuellement MAILOTION et je cherche\nquelques boutiques en ligne pour tester gratuitement\nmon travail.\n\nMon idée est simple : vous aider à récupérer davantage\nde ventes grâce aux paniers abandonnés et à donner\nenvie à vos clients de revenir acheter, avec des emails\nmieux pensés et adaptés à votre univers.\n\nMême si vous avez déjà des emails automatiques,\nil y a peut-être des choses à améliorer.\n\nJe vous propose de m'en occuper gratuitement,\nsans engagement. En échange, j'aimerais simplement\navoir votre avis sur le résultat.\n\nEst-ce que ça pourrait vous intéresser ?\n\nBonne journée,\nLudovic — MAILOTION";
 const $=id=>document.getElementById(id);
 const crm=()=>window.MailotionCRM;
 const cloud=()=>window.MailotionCloud;
 const state={current:'',opened:'',openedMessage:'',openedSubject:'',skipped:new Set(),signature:'',ready:false};
+let personalTimer;
 function validEmail(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s||'').trim())}
 function isInvalid(p){return p.emailStatus==='invalide'||(cloud()?.getEmails()||[]).some(x=>x.prospectId===p.id&&x.email?.trim().toLowerCase()===p.email?.trim().toLowerCase()&&x.status==='invalide')}
 function alreadySent(p){return (cloud()?.getActions()||[]).some(x=>x.prospectId===p.id&&x.type==='email_envoye'&&x.status==='terminee')}
@@ -25,8 +26,9 @@ function setLead(id){
  state.current=p?.id||'';state.opened='';state.openedMessage='';state.openedSubject='';
  $('outreachGreeting').value=p?greeting(p):'';
  $('outreachSubject').value=p?'Une petite proposition pour '+p.name:'';
+ $('outreachPersonal').value=p?.outreachPersonal||'';
  $('outreachLead').value=state.current;
- for(const n of ['outreachGreeting','outreachSubject','outreachBody','outreachFollowup'])$(n).disabled=!p;
+ for(const n of ['outreachGreeting','outreachSubject','outreachBody','outreachFollowup','outreachPersonal'])$(n).disabled=!p;
  renderPreview();
 }
 function refresh(){
@@ -40,13 +42,45 @@ function refresh(){
   else{sel.disabled=false;for(const p of q)sel.add(new Option(p.name+(p.priority==='haute'?' ★':''),p.id))}
  }
  $('outreachSkip').disabled=!q.length;
- if(q.some(p=>p.id===state.current)){$('outreachLead').value=state.current;renderPreview()}
+ if(q.some(p=>p.id===state.current)){
+  $('outreachLead').value=state.current;
+  const p=current();if(document.activeElement!==$('outreachPersonal')&&$('outreachPersonal').value!==(p.outreachPersonal||''))$('outreachPersonal').value=p.outreachPersonal||'';
+  renderPreview()
+ }
  else setLead(q[0]?.id||'');
+}
+function composeMessage(){
+ const salutation=$('outreachGreeting').value.trim();
+ const common=$('outreachBody').value.trim();
+ const personal=$('outreachPersonal').value.trim();
+ // Insérer les questions AVANT la signature, jamais après le nom du commercial.
+ const match=common.match(/\n\s*(Bonne journée,\s*\nLudovic\s*[—-]\s*MAILOTION\s*)$/i);
+ if(!match)return [salutation,common,personal].filter(Boolean).join('\n\n');
+ const text=common.slice(0,match.index).trim();
+ return [salutation,text,personal,match[1].trim()].filter(Boolean).join('\n\n');
+}
+function updateResearch(p){
+ const filled=!!p?.outreachPersonal?.trim();
+ $('outreachResearchBadge').textContent=filled?(p.outreachReviewedAt?'Analysé le '+p.outreachReviewedAt.split('-').reverse().join('/'):'Texte personnalisé'):'À analyser';
+ $('outreachResearchBadge').classList.toggle('ready',filled);
+ $('outreachResearchNote').textContent=p?.outreachResearch||'Aucune analyse enregistrée. Demande à ChatGPT d’étudier la boutique puis de synchroniser le CRM.';
+ let link='';
+ try{const u=new URL(p?.outreachSource||'');if(u.protocol==='https:'||u.protocol==='http:')link=u.href}catch{}
+ $('outreachSource').hidden=!link;if(link)$('outreachSource').href=link;
+}
+function savePersonal(){
+ const p=current();if(!p)return;
+ p.outreachPersonal=$('outreachPersonal').value.slice(0,1800);
+ p.updatedAt=new Date().toISOString();
+ $('outreachResearchBadge').textContent='Modifié sur ce téléphone';
+ clearTimeout(personalTimer);
+ personalTimer=setTimeout(()=>{crm().persist();},420);
+ renderPreview();
 }
 function renderPreview(){
  const p=current(),valid=eligible(p)&&!state.skipped.has(p.id);
  const subject=valid?$('outreachSubject').value.trim():'Aucun email à préparer';
- const content=valid?$('outreachGreeting').value.trim()+'\n\n'+$('outreachBody').value.trim():'';
+ const content=valid?composeMessage():'';
  $('outreachPreviewSubject').textContent=subject;
  $('outreachPreviewTo').textContent=valid?'À : '+p.email:'Ajoute une boutique « À contacter » avec une adresse email, ou synchronise le CRM.';
  $('outreachPreviewBody').textContent=content;
@@ -57,8 +91,10 @@ function renderPreview(){
    p.emailStatus!=='confirme'?'Adresse email non confirmée : vérifie-la avant envoi.':'';
   if(!cloud().status().connected)warning+=(warning?' ':'')+'Google non connecté : l’historique sera d’abord enregistré sur ton téléphone.';
  }
- $('outreachWarning').hidden=!warning;$('outreachWarning').textContent=warning;
- const ready=valid&&!!$('outreachGreeting').value.trim()&&!!$('outreachSubject').value.trim()&&!!$('outreachBody').value.trim();
+ if(valid&&!$('outreachPersonal').value.trim())warning+=(warning?' ':'')+'Personnalisation absente : connecte Google pour recevoir les questions issues de l’analyse du site.';
+  $('outreachWarning').hidden=!warning;$('outreachWarning').textContent=warning;
+ updateResearch(p);
+ const ready=valid&&!!$('outreachGreeting').value.trim()&&!!$('outreachSubject').value.trim()&&!!$('outreachBody').value.trim()&&!!$('outreachPersonal').value.trim();
  const link=$('outreachCompose');
  link.href=ready?'mailto:'+encodeURIComponent(p.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(content):'#';
  link.setAttribute('aria-disabled',ready?'false':'true');link.classList.toggle('disabled',!ready);
@@ -70,18 +106,18 @@ function saveText(){
 }
 function openDraft(event){
  const p=current();
- if(!eligible(p)||!$('outreachGreeting').value.trim()||!$('outreachSubject').value.trim()||!$('outreachBody').value.trim()){
+ if(!eligible(p)||!$('outreachGreeting').value.trim()||!$('outreachSubject').value.trim()||!$('outreachBody').value.trim()||!$('outreachPersonal').value.trim()){
   event.preventDefault();crm().toast('Vérifie la boutique, l’adresse, l’objet et le message.');return;
  }
  state.opened=p.id;
  state.openedSubject=$('outreachSubject').value.trim();
- state.openedMessage=$('outreachGreeting').value.trim()+'\n\n'+$('outreachBody').value.trim();
+ state.openedMessage=composeMessage();
  renderPreview();
  // La véritable action Envoyer doit être réalisée dans la messagerie choisie.
 }
 function confirmSent(){
  const p=current();if(!p||p.id!==state.opened)return;
- const subject=$('outreachSubject').value.trim(),content=$('outreachGreeting').value.trim()+'\n\n'+$('outreachBody').value.trim();
+ const subject=$('outreachSubject').value.trim(),content=composeMessage();
  if(subject!==state.openedSubject||content!==state.openedMessage){crm().toast('Le texte a changé : rouvre le brouillon avant de confirmer.');return}
  if(!confirm('As-tu réellement appuyé sur « Envoyer » dans ta messagerie pour '+p.name+' ?\n\nOK inscrira cet envoi dans l’historique.'))return;
  const r=cloud().recordOutreachSent(p.id,p.email,subject,content,$('outreachFollowup').checked);
@@ -98,12 +134,13 @@ function skip(){
 function init(){
  if(state.ready)return;if(!crm()||!cloud()){setTimeout(init,100);return}
  state.ready=true;
- try{$('outreachBody').value=localStorage.getItem(STORAGE)??DEFAULT_BODY}catch{$('outreachBody').value=DEFAULT_BODY}
+ try{const saved=localStorage.getItem(STORAGE),previous=DEFAULT_BODY.replace('quelques boutiques en ligne','quelques boutiques Shopify');$('outreachBody').value=saved===previous?DEFAULT_BODY:(saved??DEFAULT_BODY)}catch{$('outreachBody').value=DEFAULT_BODY}
  $('outreachLead').addEventListener('change',e=>setLead(e.target.value));
  $('outreachSkip').addEventListener('click',skip);
  $('outreachBody').addEventListener('input',()=>{saveText();renderPreview()});
  $('outreachGreeting').addEventListener('input',renderPreview);
  $('outreachSubject').addEventListener('input',renderPreview);
+ $('outreachPersonal').addEventListener('input',savePersonal);
  $('outreachReset').addEventListener('click',()=>{if(!confirm('Revenir au message initial Mailotion et remplacer ton texte enregistré ?'))return;$('outreachBody').value=DEFAULT_BODY;saveText();renderPreview()});
  $('outreachCompose').addEventListener('click',openDraft);
  $('outreachConfirm').addEventListener('click',confirmSent);
