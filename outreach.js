@@ -19,7 +19,7 @@ function current(){return (crm()?.state.records||[]).find(x=>x.id===state.curren
 function greeting(p){
  const name=String(p.contact||'').trim();
  if(/^[A-Za-zÀ-ÿ-]{2,25}$/.test(name)&&!/^(service|direction|manager|gérant|gerant|contact|client|responsable|équipe|equipe)$/i.test(name))return 'Bonjour '+name+',';
- return 'Bonjour à l’équipe de '+p.name+',';
+ return (/^[AaEeIiOoUuYyÀÂÄÉÈÊËÎÏÔÖÙÛÜŒÆ]/.test(p.name)?'Bonjour à l’équipe d’':'Bonjour à l’équipe de ')+p.name+',';
 }
 function setLead(id){
  const p=(crm()?.state.records||[]).find(x=>x.id===id);
