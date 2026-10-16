@@ -5,7 +5,7 @@ const read=name=>fs.readFileSync(name,'utf8');
 const html=read('index.html'),app=read('app.js'),cloud=read('crm-cloud.js');
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(ids.length,new Set(ids).size,'IDs HTML uniques');
-for(const name of ['app.js','crm-cloud.js','sw.js'])new Function(read(name));
+for(const name of ['app.js','crm-cloud.js','outreach.js','sw.js'])new Function(read(name));
 for(const [,id] of [...app.matchAll(/\$\('([^']+)'\)/g),...cloud.matchAll(/\$\('([^']+)'\)/g)])assert.ok(ids.includes(id),'Champ '+id+' existe dans HTML');
 const publicData=JSON.parse(read('prospects.json'));
 assert.equal(publicData.boutiques.length,11,'Les 11 prospects publics initiaux sont conservés');
@@ -25,4 +25,38 @@ const values=api.values('Prospects',base);
 assert.equal(values.length,7,'Colonnes Sheets prospects');
 assert.equal(JSON.parse(values[6]).id,base.id,'JSON intact');
 const sw=read('sw.js');assert.ok(sw.includes('crm-cloud.js'),'Module cloud disponible hors ligne');
-console.log('PASS - scripts, UI, 11 contacts, données privées, merge, conflits, dédoublonnage, schéma Google Sheets.');
+
+// La prospection n'envoie jamais d'email toute seule : le mailto ouvre la messagerie,
+// l'historique est créé seulement après validation humaine explicite.
+const outreach=read('outreach.js');
+assert.ok(html.includes('id="outreachCompose"')&&html.includes('id="outreachConfirm"'));
+assert.ok(html.includes('src="./outreach.js"'));
+assert.ok(sw.includes('outreach.js'),'Prospection disponible après installation de la PWA');
+assert.ok(outreach.includes('mailto:')&&outreach.includes('recordOutreachSent'));
+assert.ok(outreach.includes('Je développe actuellement MAILOTION'));
+assert.ok(outreach.includes('Je vous propose de m\u0027en occuper gratuitement'));
+assert.ok(outreach.includes('As-tu réellement appuyé'));
+const extract=outreach.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/,
+ 'return {eligible,greeting,queue,alreadySent,isInvalid};\n})();');
+assert.notEqual(extract,outreach,'Extraire les fonctions pures de prospection');
+const leads=[
+ {id:'a',name:'Boutique Bonjour',email:'contact@bonjour.fr',stage:'a_contacter',lastContact:'',priority:'haute'},
+ {id:'b',name:'Boutique Contactée',email:'contact@deja.fr',stage:'contactee'},
+ {id:'c',name:'Boutique invalide',email:'invalide@shop.fr',stage:'a_contacter',emailStatus:'invalide'},
+ {id:'d',name:'Boutique déjà envoyée',email:'contact@ancienne.fr',stage:'a_contacter'},
+ {id:'e',name:'Boutique sans email',email:'',stage:'a_contacter'},
+ {id:'f',name:'Boutique Paul',contact:'Paul',email:'bonjour@paul.fr',stage:'a_contacter'}
+];
+const outreachContext={window:{
+ MailotionCRM:{state:{records:leads}},
+ MailotionCloud:{getActions:()=>[{prospectId:'d',type:'email_envoye',status:'terminee'}],getEmails:()=>[]}
+}};
+const funcs=vm.runInNewContext(extract,outreachContext);
+assert.equal(funcs.queue().length,2,'Aucune boutique déjà contactée ou invalide dans la file');
+assert.equal(funcs.queue()[0].id,'a','Prospect prioritaire en premier');
+assert.equal(funcs.greeting(leads[0]),'Bonjour à l’équipe de Boutique Bonjour,');
+assert.equal(funcs.greeting(leads[5]),'Bonjour Paul,');
+assert.equal(funcs.eligible(leads[2]),false,'Jamais proposer un email invalide');
+assert.equal(funcs.eligible(leads[3]),false,'Ne pas contacter une deuxième fois le même prospect');
+
+console.log('PASS - scripts, UI, 11 contacts + prospection, données privées, merge, conflits, dédoublonnage, schéma Google Sheets.');
