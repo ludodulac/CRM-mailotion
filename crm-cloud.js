@@ -288,13 +288,13 @@ function saveAction(e){
  const a={id:old?.id||uid('action'),prospectId,date:validDate($('aDate').value),due:validDate($('aDue').value),type:$('aType').value,status:$('aStatus').value,description,next:val($('aNext').value,800),createdAt:old?.createdAt||stamp,updatedAt:stamp};
  if(old)Object.assign(old,a);else state.actions.push(a);
  const rec=getProspect(prospectId);
- if(rec&&a.status==='terminee'){rec.lastAction=a.description;if(a.date)rec.lastContact=a.date;rec.updatedAt=stamp;api().persist()}
+ if(rec&&a.status==='terminee'){rec.lastAction=a.description;if(a.date&&['email_envoye','appel','reponse_recue','relance'].includes(a.type))rec.lastContact=a.date;rec.updatedAt=stamp;api().persist()}
  saveLocal();closeDialog('actionDialog');renderToday();scheduleCloud();api().toast('Action enregistrée.');
 }
 function completeAction(id){
  const a=state.actions.find(x=>x.id===id);if(!a)return;
  a.status='terminee';a.updatedAt=new Date().toISOString();saveLocal();
- const r=getProspect(a.prospectId);if(r){r.lastAction=a.description;if(!r.lastContact&&a.date)r.lastContact=a.date;r.updatedAt=a.updatedAt;api().persist()}
+ const r=getProspect(a.prospectId);if(r){r.lastAction=a.description;if(a.date&&['email_envoye','appel','reponse_recue','relance'].includes(a.type))r.lastContact=a.date;if(a.type==='relance'&&r.followup===a.due)r.followup='';r.updatedAt=a.updatedAt;api().persist()}
  renderToday();scheduleCloud();api().toast('Action terminée, retirée de la liste À faire.');
 }
 function postponeAction(id){
@@ -302,7 +302,7 @@ function postponeAction(id){
  const choice=prompt('Nouvelle date de relance (AAAA-MM-JJ) :',a.due||date());
  if(choice===null)return;
  if(!validDate(choice)){api().toast('Date invalide, utilise AAAA-MM-JJ.');return}
- a.due=choice;a.updatedAt=new Date().toISOString();saveLocal();renderToday();scheduleCloud();api().toast('Tâche reportée au '+format(choice)+'.');
+ const previous=a.due;a.due=choice;a.updatedAt=new Date().toISOString();const r=getProspect(a.prospectId);if(r&&a.type==='relance'&&r.followup===previous){r.followup=choice;r.updatedAt=a.updatedAt;api().persist()}saveLocal();renderToday();scheduleCloud();api().toast('Tâche reportée au '+format(choice)+'.');
 }
 function finishLead(id){
  const r=getProspect(id);if(!r)return;
