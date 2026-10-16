@@ -11,6 +11,8 @@ Pour l'installer sur Android : ouvrir ce lien dans Chrome → ⋮ → **Ajouter 
 ## Nouvelles fonctions
 
 - Page **AUJOURD'HUI** : priorités, relances dues/en retard, contacts à faire, prestations gratuites et offres en attente.
+- **Atelier Mes emails de prospection** : message de prise de contact Mailotion préenregistré, accueil personnalisé avec le nom de la boutique ou le prénom du contact connu, objet personnalisable, aperçu et préparation d'un email à la fois. L'application ouvre Gmail/Outlook via `mailto:` : **jamais d'envoi automatique**. L'utilisateur doit envoyer lui-même puis confirmer « J'ai envoyé cet email » dans le CRM ; seule cette confirmation crée un événement `email_envoye` dans l'historique commercial privé. Une relance de 5 jours peut être ajoutée facultativement. Les boutiques déjà contactées et les emails invalides sont exclus de la file. Le texte commun modifié est sauvegardé uniquement dans le navigateur (`mailotion-outreach-template-v1`).
+
 - Fiche boutique : site, secteur, ville, contact, coordonnées, source, vérification, outil email, problèmes, opportunités, priorité, qualification, statut, audit, propositions, notes.
 - Historique chronologique : événements et tâches datées, reportables et terminables.
 - Historique des emails : trouvé non testé, confirmé, invalide ou alternatif à tester. Un email invalide n'est jamais proposé comme destinataire.
@@ -44,7 +46,7 @@ Les additions publiques depuis ChatGPT dans `prospects.json` restent compatibles
 
 ## Fiabilité et limites
 
-- Les 11 prospects publics originaux ont été copiés dans le classeur privé ; les données locales supplémentaires sont sur l'appareil et n'ont pas pu être lues à distance.
+- Les 11 prospects publics originaux ont été copiés dans le classeur privé ; un prospect additionnel issu d'échanges commerciaux précédents a été enregistré directement dans la base privée. Les éventuelles fiches supplémentaires restées uniquement sur un appareil ne sont visibles par ChatGPT qu'après synchronisation.
 - Le module cloud exécute lecture, fusion, écriture par lignes et **relecture après écriture**. Le connecteur ChatGPT a été testé sur le classeur privé, mais la connexion OAuth **depuis le téléphone** doit encore être vérifiée après configuration.
 - Google Sheets n'offre pas de verrouillage transactionnel dans cette implémentation : éviter d'éditer **la même fiche simultanément** depuis ChatGPT et le téléphone. En cas de conflit détecté, le CRM garde une copie locale du conflit.
 - Le dépôt public contient encore des *révisions Git historiques*. Une note privée précédemment copiée dans `prospects.json` a été retirée de la version courante, mais l'ancienne révision reste accessible tant que l'historique Git n'est pas purgé.
