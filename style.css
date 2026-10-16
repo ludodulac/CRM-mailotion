@@ -29,3 +29,44 @@ main.container{margin-top:-54px;position:relative}.stats{display:grid;grid-templ
 #timelineBody .event{border-left:3px solid #d9c6f2;padding:0 0 20px 15px;margin:12px 0 0}.event .event-head{display:flex;flex-wrap:wrap;gap:7px;align-items:center}.event strong{font-size:13px}.event small{font-size:10px;color:#92849b}.event p{font-size:12px;color:#655c70;line-height:1.6;white-space:pre-wrap;margin:7px 0}.event button{background:#f4edfd;border:1px solid #e3d7f4;border-radius:8px;padding:7px 10px;font-size:11px;color:#6944aa;font-weight:800}
 #timelineBody .event.done{border-color:#a4d4be}.cloud-blink{color:#c05a3e;font-weight:800}
 @media(max-width:700px){.today-panel,.cloud-panel{padding:16px 13px;border-radius:17px}.today-panel .section-heading{flex-wrap:wrap}.today-list{grid-template-columns:1fr}.cloud-title{flex-wrap:wrap}.cloud-title .button{flex:1}.cloud-settings{grid-template-columns:1fr}.today-card{padding:12px 9px}}
+
+
+/* Prospection : un mail personnalisé à la fois, compatible mobile */
+.outreach-panel{background:#fff;border:1px solid #e8e0ef;box-shadow:var(--shadow);border-radius:20px;padding:23px;margin-bottom:18px}
+.outreach-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.outreach-head h2{margin:2px 0 7px;font-size:22px;letter-spacing:-.65px;color:#2b1844}
+.outreach-count{font-size:11px;white-space:nowrap;padding:9px 11px;background:#efe9fa;color:#593d98;border-radius:11px;font-weight:800}
+.outreach-grid{display:grid;grid-template-columns:minmax(320px,.92fr) minmax(350px,1.08fr);gap:17px}
+.outreach-left,.outreach-right{min-width:0}
+.outreach-selection{background:#f7f3fc;border:1px solid #ebe4f5;border-radius:14px;padding:14px;margin-bottom:13px}
+.outreach-selection label{display:block;font-size:12px;font-weight:800;margin-bottom:8px;color:#514167}
+.outreach-selection select{width:100%;border-radius:10px;border:1px solid #e0d4ef;background:#fff;min-height:47px;padding:9px 12px;font-size:14px;color:#38274e}
+.outreach-recipient{font-size:12px;color:#6f5d80;margin-top:12px;overflow-wrap:anywhere;line-height:1.5}
+.outreach-warning{font-size:11px;color:#956127;background:#fff5e5;border:1px solid #f2dfbf;border-radius:9px;padding:9px;margin-top:10px;line-height:1.55}
+.outreach-selection .button{margin-top:12px;width:100%}
+.outreach-editor{border:1px solid #eae5f0;border-radius:14px;padding:15px}
+.outreach-editor .field{margin-bottom:13px}
+.outreach-editor .field label{display:block;font-size:12px;font-weight:800;color:#59486e;margin-bottom:7px}
+.outreach-editor .field label small{font-weight:500;color:#95869f}
+.outreach-editor .field input,.outreach-editor .field textarea{width:100%;border:1px solid #e2dce9;border-radius:11px;padding:11px 12px;color:#2b2038;font-size:14px;line-height:1.55;background:#fcfbfe;outline:0;min-width:0}
+.outreach-editor .field input:focus,.outreach-editor .field textarea:focus{border-color:#8d68d5;box-shadow:0 0 0 3px #b298eb33}
+.outreach-editor .field textarea{resize:vertical;min-height:350px}
+.outreach-editor-foot{display:flex;gap:12px;justify-content:space-between;align-items:center;font-size:10px;color:#668578;flex-wrap:wrap}
+.outreach-editor-foot button{font-size:11px;color:#6742ae;border:0;background:none;font-weight:800;text-decoration:underline}
+.outreach-email-preview{overflow:hidden;background:#fff;border-radius:14px;border:1px solid #e8e2f0;box-shadow:0 9px 25px #4c246111}
+.outreach-preview-header{display:flex;justify-content:space-between;gap:6px;background:#35204f;color:#d8c3f1;padding:13px 15px;font-size:10px;font-weight:900;letter-spacing:1.2px}
+.outreach-live{font-size:9px;letter-spacing:.6px;color:#bfe9ca;white-space:nowrap}
+.outreach-preview-subject{border-bottom:1px solid #f1ebf3;display:flex;flex-direction:column;gap:5px;padding:17px 18px}
+.outreach-preview-subject strong{font-size:15px;color:#38244d;line-height:1.4;overflow-wrap:anywhere}
+.outreach-preview-subject small{font-size:11px;color:#81748e;overflow-wrap:anywhere}
+#outreachPreviewBody{font:13px/1.72 system-ui,-apple-system,Arial,sans-serif;padding:19px;margin:0;color:#4c4158;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word;min-height:240px;max-height:490px;overflow-y:auto}
+.outreach-send-actions{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.outreach-send-actions .button{min-height:48px;white-space:normal;text-align:center;font-size:13px}
+.outreach-send-actions .button:disabled{opacity:.48;cursor:not-allowed}
+.outreach-compose.disabled{pointer-events:none;opacity:.46}
+.outreach-follow{display:flex;align-items:center;gap:9px;margin:13px 0 0;font-size:12px;color:#5d4b72;font-weight:700;flex-wrap:wrap}
+.outreach-follow input{width:18px;height:18px;accent-color:#744bc9}
+.outreach-follow small{color:#95889e;font-weight:500;font-size:11px}
+.outreach-footnote{font-size:11px;color:#83788e;line-height:1.67;margin:14px 0 0;padding:12px;background:#f8f6fb;border-radius:11px}
+@media(max-width:850px){.outreach-grid{grid-template-columns:1fr}.outreach-email-preview{max-width:none}}
+@media(max-width:600px){.outreach-panel{padding:16px 12px;border-radius:17px}.outreach-head{align-items:flex-start;flex-direction:column;gap:9px}.outreach-head h2{font-size:20px}.outreach-editor .field textarea{min-height:310px}.outreach-preview-header{padding:11px}.outreach-preview-subject{padding:13px}#outreachPreviewBody{font-size:13px;padding:14px;max-height:450px}}
