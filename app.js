@@ -68,7 +68,7 @@ function sanitize(raw,source='local'){
  emailStatus:['trouve_non_teste','confirme','invalide','alternatif_a_tester'].includes(raw.emailStatus)?raw.emailStatus:'',
  lastAction:txt(raw.lastAction||'',1000), nextAction:txt(raw.nextAction||'',1200),
  proposalSent:raw.proposalSent===true,freeInProgress:raw.freeInProgress===true,
- paidOffer:txt(raw.paidOffer||'',300),clientAcquired:raw.clientAcquired===true,
+ paidOffer:txt(raw.paidOffer||'',300),clientAcquired:raw.clientAcquired===true,archived:raw.archived===true,
  origin:source==='github'?'github':'local',
  createdAt:txt(raw.createdAt,30)||new Date().toISOString(),
  updatedAt:txt(raw.updatedAt,30)||new Date().toISOString()
@@ -92,7 +92,7 @@ function mergeContacts(input,origin,withUpdates=false){
    const existing=findMatch(r);
    if((state.deleted.includes(r.id))||existing&&state.deleted.includes(existing.id)){ignored++;continue}
    if(existing){found++;if(withUpdates&&origin==='github'){
-    for(const f of ['email','phone','website','sourceUrl','sector','city','contact'])if(!existing[f]&&r[f])existing[f]=r[f];
+    for(const f of ['email','phone','website','sourceUrl','sector','city','contact'])if(!existing[f]&&r[f]&&!(f==='email'&&existing.emailStatus==='invalide'))existing[f]=r[f];
     existing.origin=existing.origin==='local'?'local':'github';
    }continue}
    if(origin==='github'){r.notes='';r.help='';r.offer='';r.lastContact='';r.followup='';r.stage='a_contacter'}
@@ -194,7 +194,7 @@ function handleForm(ev){
 function deleteLead(){
  const r=state.records.find(x=>x.id===state.editing);if(!r)return;
  if(!confirm('Supprimer « '+r.name+' » du CRM sur cet appareil ?'))return;
- if(r.origin==='github')state.deleted.push(r.id);
+ if(!state.deleted.includes(r.id))state.deleted.push(r.id);
  state.records=state.records.filter(x=>x.id!==r.id);
  persist();closeDialog($('leadDialog'));render();toast('Boutique supprimée de ton CRM.');
 }
