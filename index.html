@@ -25,6 +25,15 @@
    <button class="stat" data-summary="free" type="button"><span class="stat-name">Aide gratuite</span><strong id="freeCount">0</strong><span class="stat-sub">en cours</span></button>
    <button class="stat" data-summary="clients" type="button"><span class="stat-name">Clientes</span><strong id="clientCount">0</strong><span class="stat-sub">offre payante</span></button>
  </section>
+ <section class="today-panel" id="todayPanel">
+ <div class="section-heading"><div><p class="eyebrow accent">CENTRE DE SUIVI</p><h2>☀ AUJOURD'HUI</h2><p class="today-sub">Mes actions, mes relances et les prochaines étapes.</p></div><button type="button" id="todayAdd" class="button button-primary">＋ Ajouter une tâche</button></div>
+ <div id="todaySummary" class="today-summary"></div><div id="todayList" class="today-list"><p class="subtext">Chargement des tâches…</p></div>
+ </section>
+ <section class="cloud-panel" id="cloudPanel">
+ <div class="cloud-title"><div><b>☁ Mémoire partagée ChatGPT</b><p id="cloudMessage">Non connectée : les contacts sont encore sauvegardés uniquement sur ton téléphone.</p></div><button class="button button-primary" id="cloudConnect" type="button">Connecter Google</button></div>
+ <div class="cloud-settings" id="cloudSettings" hidden><div class="field"><label for="cloudClientId">Identifiant OAuth Google (non secret)</label><input id="cloudClientId" type="text" autocomplete="off" placeholder="…apps.googleusercontent.com"></div><div class="field"><label for="cloudSheetId">Identifiant du tableau privé Google Sheets</label><input id="cloudSheetId" type="text" autocomplete="off" placeholder="Identifiant de la feuille privée"></div><div class="cloud-actions"><button type="button" class="button button-secondary" id="cloudSaveSettings">Enregistrer la configuration</button><a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener noreferrer">Créer l'identifiant OAuth ↗</a></div></div>
+ <p class="cloud-note">Les notes et historiques ne partent jamais vers GitHub. Connexion Google autorisée uniquement sur ton compte ; aucun mot de passe ou jeton enregistré dans le dépôt.</p>
+ </section>
  <section class="board">
   <div class="section-heading"><div><p class="eyebrow accent">CARNET D'ADRESSES</p><h2>Suivi des boutiques</h2></div><div class="sync-status" id="syncStatus">○ Prêt</div></div>
   <div class="controls">
@@ -70,11 +79,25 @@
     <div class="field"><label for="fLast">Dernier contact</label><input id="fLast" type="date"></div>
     <div class="field"><label for="fOffer">Montant proposé (€)</label><input id="fOffer" inputmode="decimal" type="number" step="0.01" min="0" placeholder="Facultatif"></div>
     <div class="field span2"><label for="fHelp">Ce que je propose à cette boutique</label><textarea id="fHelp" maxlength="2000" placeholder="Ex. Audit gratuit des emails de bienvenue, panier abandonné, après-achat…"></textarea></div>
-    <div class="field span2"><label for="fNotes">Notes privées / prochaine action</label><textarea id="fNotes" maxlength="4000" placeholder="Échanges, besoins, idées, suite à donner…"></textarea><small>Ces notes restent sur cet appareil, pas sur GitHub.</small></div>
+    <div class="field span2"><h3 class="inline-section">Qualification & opportunités</h3></div>
+ <div class="field"><label for="fPriority">Priorité</label><select id="fPriority"><option value="">À déterminer</option><option value="haute">Haute</option><option value="moyenne">Moyenne</option><option value="basse">Basse</option></select></div>
+ <div class="field"><label for="fQualification">Qualification</label><input id="fQualification" maxlength="120" placeholder="Ex. À analyser"></div>
+ <div class="field"><label for="fEmailTool">Outil email utilisé (si connu)</label><input id="fEmailTool" maxlength="110" placeholder="Ex. Klaviyo"></div>
+ <div class="field"><label for="fEmailStatus">Statut de l'email</label><select id="fEmailStatus"><option value="">Inconnu</option><option value="trouve_non_teste">Trouvé, non testé</option><option value="confirme">Fonctionnel confirmé</option><option value="invalide">Invalide — ne pas contacter</option><option value="alternatif_a_tester">Alternatif à tester</option></select></div>
+ <div class="field span2"><label for="fProblems">Problèmes repérés</label><textarea id="fProblems" maxlength="3500" placeholder="Uniquement les problèmes effectivement vérifiés"></textarea></div>
+ <div class="field span2"><label for="fOpportunities">Opportunités à proposer</label><textarea id="fOpportunities" maxlength="3500"></textarea></div>
+ <div class="field span2"><h3 class="inline-section">Coordonnées & suivi</h3></div>
+ <div class="field span2"><label for="fContactPage">Page de contact</label><input id="fContactPage" maxlength="340" placeholder="https://..."></div>
+ <div class="field"><label for="fVerifiedAt">Coordonnées vérifiées le</label><input type="date" id="fVerifiedAt"></div>
+ <div class="field"><label for="fLastAction">Dernière action</label><input id="fLastAction" maxlength="1000"></div>
+ <div class="field span2"><label for="fNextAction">Prochaine action</label><input id="fNextAction" maxlength="1200"></div>
+ <div class="field span2"><label for="fPaidOffer">Offre payante proposée</label><input id="fPaidOffer" maxlength="300"></div>
+ <div class="field span2 checkbox-row"><label><input type="checkbox" id="fProposalSent"> Proposition envoyée</label><label><input type="checkbox" id="fFreeInProgress"> Aide gratuite en cours</label><label><input type="checkbox" id="fClientAcquired"> Client acquis</label></div>
+ <div class="field span2"><label for="fNotes">Notes privées / prochaine action</label><textarea id="fNotes" maxlength="4000" placeholder="Échanges, besoins, idées, suite à donner…"></textarea><small>Les notes restent privées : sur ton téléphone, puis dans ton Google Sheets privé si tu actives la connexion.</small></div>
     <div class="field span2"><label for="fSource">Source de la fiche (facultatif)</label><input id="fSource" maxlength="320" placeholder="Lien public où les coordonnées ont été trouvées"></div>
    </div>
  </div>
- <div class="dialog-actions"><button type="button" id="deleteBtn" class="button button-danger">Supprimer</button><span class="spacer"></span><button type="button" class="button button-secondary" data-close="leadDialog">Annuler</button><button type="submit" class="button button-primary">Enregistrer</button></div></form>
+ <div class="dialog-actions"><button type="button" id="historyBtn" class="button button-secondary">🕘 Historique</button><button type="button" id="emailsBtn" class="button button-secondary">✉ Emails</button><button type="button" id="deleteBtn" class="button button-danger">Supprimer</button><span class="spacer"></span><button type="button" class="button button-secondary" data-close="leadDialog">Annuler</button><button type="submit" class="button button-primary">Enregistrer</button></div></form>
 </dialog>
 <dialog id="importDialog" class="dialog import-dialog">
  <div class="dialog-head"><div><p class="eyebrow accent">AJOUTER DES CONTACTS</p><h2>Importer des boutiques</h2></div><button type="button" class="close-btn" data-close="importDialog" aria-label="Fermer">×</button></div>
@@ -85,6 +108,18 @@ Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textar
  <div class="notice"><b>Confidentialité :</b> les boutiques saisies directement ici, leur suivi et tes notes sont uniquement enregistrés dans ce navigateur. Si tu demandes à ChatGPT d'écrire dans <code>prospects.json</code> sur GitHub, <b>ces coordonnées professionnelles seront publiques</b>. N'y ajoute pas de données personnelles ou de notes confidentielles.</div></div>
  <div class="dialog-actions"><button class="button button-secondary" type="button" data-close="importDialog">Annuler</button><button class="button button-primary" type="button" id="importConfirm">Importer</button></div>
 </dialog>
-<div id="toast" role="status" aria-live="polite" class="toast"></div>
-<script src="./app.js" defer></script>
+<dialog class="dialog" id="actionDialog"><form id="actionForm"><div class="dialog-head"><div><p class="eyebrow accent">HISTORIQUE & TÂCHES</p><h2 id="actionTitle">Nouvelle action</h2></div><button class="close-btn" type="button" data-close-cloud="actionDialog">×</button></div>
+ <div class="dialog-scroll"><div class="form-grid">
+ <div class="field span2"><label for="aProspect">Boutique</label><select id="aProspect" required></select></div>
+ <div class="field"><label for="aType">Type d'action</label><select id="aType"><option value="tache">Tâche</option><option value="email_envoye">Email envoyé</option><option value="reponse_recue">Réponse reçue</option><option value="relance">Relance</option><option value="audit_gratuit">Audit gratuit</option><option value="proposition">Proposition commerciale</option><option value="appel">Appel</option><option value="note">Note d'historique</option></select></div>
+ <div class="field"><label for="aStatus">État</label><select id="aStatus"><option value="a_faire">À faire</option><option value="terminee">Terminée</option><option value="en_cours">En cours</option><option value="annulee">Annulée</option></select></div>
+ <div class="field"><label for="aDate">Date de l'action</label><input type="date" id="aDate"></div>
+ <div class="field"><label for="aDue">Échéance / relance</label><input type="date" id="aDue"></div>
+ <div class="field span2"><label for="aDescription">Description</label><textarea id="aDescription" maxlength="2600" required placeholder="Ex. Préparer l'audit d'emails de bienvenue…"></textarea></div>
+ <div class="field span2"><label for="aNext">Étape suivante (facultatif)</label><input id="aNext" maxlength="800" placeholder="Ex. Relancer le 20 octobre"></div>
+ </div></div><div class="dialog-actions"><button type="button" class="button button-secondary" data-close-cloud="actionDialog">Annuler</button><button type="submit" class="button button-primary">Enregistrer</button></div></form></dialog>
+ <dialog class="dialog" id="timelineDialog"><div class="dialog-head"><div><p class="eyebrow accent">CHRONOLOGIE</p><h2 id="timelineTitle">Historique</h2></div><button type="button" class="close-btn" data-close-cloud="timelineDialog">×</button></div><div class="dialog-scroll"><div id="timelineBody"></div></div><div class="dialog-actions"><button id="timelineAdd" type="button" class="button button-primary">＋ Ajouter une action</button></div></dialog>
+ <dialog class="dialog" id="emailDialog"><div class="dialog-head"><div><p class="eyebrow accent">SUIVI DES ADRESSES</p><h2 id="emailTitle">Historique des emails</h2></div><button type="button" class="close-btn" data-close-cloud="emailDialog">×</button></div><div class="dialog-scroll"><div id="emailList"></div><form id="emailForm" class="form-grid"><div class="field span2"><label for="eValue">Email professionnel</label><input type="email" id="eValue" required></div><div class="field"><label for="eStatus">Statut</label><select id="eStatus"><option value="trouve_non_teste">Trouvé, non testé</option><option value="confirme">Fonctionnel confirmé</option><option value="invalide">Invalide</option><option value="alternatif_a_tester">Alternatif à tester</option></select></div><div class="field"><label for="eVerified">Vérifié le</label><input type="date" id="eVerified"></div><div class="field span2"><label for="eNotes">Observations</label><textarea id="eNotes" maxlength="2000"></textarea></div><div class="field span2"><button class="button button-primary" type="submit">＋ Enregistrer cette adresse</button></div></form></div></dialog>
+ <div id="toast" role="status" aria-live="polite" class="toast"></div>
+<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script>
 </body></html>
