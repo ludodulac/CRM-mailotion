@@ -51,6 +51,10 @@ Trois onglets servent de base opérationnelle :
   "clientAcquired":false,
   "offer":"",
   "help":"",
+  "outreachPersonal":"D\u0027ailleurs, j\u0027ai vu que… Est-ce que… ? Et… ?",
+  "outreachResearch":"Faits observés sur le site public + opportunité proposée",
+  "outreachSource":"https://boutique.exemple/produits/",
+  "outreachReviewedAt":"YYYY-MM-DD",
   "archived":false,
   "createdAt":"ISO8601",
   "updatedAt":"ISO8601"
@@ -134,3 +138,17 @@ Après chaque connexion, l'application relit les trois onglets, fusionne les cha
 **Limitations** : la synchronisation côté téléphone n'est pas vérifiable tant que le client OAuth n'a pas été configuré et autorisé. Google Sheets n'offre pas ici de transaction atomique inter-appareils : éviter les modifications simultanées de la même fiche ; sauvegarder en JSON. Des versions en conflit sont conservées en `localStorage` sous `mailotion-conflicts-v1`.
 
 Pour les données créées *avant* la première connexion, une sauvegarde `mailotion-precloud-snapshot-v2` est conservée localement. Le stockage du navigateur peut être supprimé par nettoyage des données du site : utiliser **Sauvegarder tout mon CRM** régulièrement.
+
+## Personnalisation commerciale fondée sur des faits publics
+
+Lorsque l'utilisateur demande d'analyser les boutiques ou d'ajouter des prospects en vue d'un premier email :
+1. Lire d'abord les fiches privées dans Prospects (ne pas travailler à partir d'une ancienne liste GitHub si la feuille privée est disponible).
+2. Visiter le site officiel de chaque boutique, ses catégories, ses fiches produit et ses éléments publics pertinents, en utilisant la recherche Internet si nécessaire. **Si le site est indisponible, le préciser et ne rien inventer.**
+3. Relever une **observation précise et vérifiable** (gamme, routine, coffrets, programme de fidélité, formulaire newsletter, etc.). Éviter les compliments génériques.
+4. Rédiger un court paragraphe d'email commençant naturellement par « D'ailleurs, j'ai vu que… » et ajoutant **deux questions concrètes** concernant l'acquisition, les paniers abandonnés, la fidélisation, les conseils après achat ou la segmentation. Les questions doivent être pertinentes pour cette boutique. **Ne jamais affirmer que des automatisations n'existent pas simplement parce qu'on ne peut pas les voir.**
+5. Enregistrer le paragraphe dans `outreachPersonal`, le résultat de l'audit dans `outreachResearch`, l'URL réellement consultée dans `outreachSource`, et la date de consultation dans `outreachReviewedAt`. Actualiser `updatedAt`, garder tous les autres champs JSON et les colonnes de synthèse, puis re-lire et vérifier les lignes écrites.
+6. Les observations et brouillons commerciaux doivent rester dans la base Google Sheets **privée**. Ne pas ajouter de fichier avec notes commerciales, réponses de clients ou données privées au dépôt GitHub public.
+7. Ne pas renvoyer d'email de première prise de contact à une boutique dont `stage` indique déjà une discussion ou dont l'historique contient un email envoyé. Ne jamais utiliser une adresse `invalide`.
+8. Ne pas supposer que toutes les boutiques utilisent Shopify. Dans le texte générique, parler de « boutiques en ligne » à moins de disposer d'une confirmation de plateforme.
+
+Le panneau « Mes emails de prospection » récupère le texte privé du prospect après la synchronisation Google et insère `outreachPersonal` **avant** « Bonne journée, Ludovic — MAILOTION ». Ce passage est modifiable depuis le téléphone, puis synchronisé comme les autres champs. Ouvrir le brouillon dans un client mail n'est **pas un envoi** ; l'action `email_envoye` n'est créée que si l'utilisateur confirme avoir réellement envoyé l'email.
