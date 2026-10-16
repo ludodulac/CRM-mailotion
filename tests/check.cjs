@@ -59,4 +59,21 @@ assert.equal(funcs.greeting(leads[5]),'Bonjour Paul,');
 assert.equal(funcs.eligible(leads[2]),false,'Jamais proposer un email invalide');
 assert.equal(funcs.eligible(leads[3]),false,'Ne pas contacter une deuxième fois le même prospect');
 
+assert.ok(outreach.includes('D’ailleurs')||outreach.includes('outreachPersonal'),'Questions par boutique disponibles');
+assert.ok(outreach.includes('quelques boutiques en ligne'),"Le texte commun fonctionne pour les sites non Shopify.");
+const extractedCompose=outreach.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/,
+ 'return {composeMessage};\n})();');
+const formMap={
+ outreachGreeting:{value:'Bonjour à l’équipe de Boutique Exemple,'},
+ outreachBody:{value:"Je développe MAILOTION.\n\nBonne journée,\nLudovic — MAILOTION"},
+ outreachPersonal:{value:"D'ailleurs, j'ai vu que vous proposez des coffrets. Avez-vous une relance de panier ? Et des conseils après achat ?"}
+};
+const context={document:{getElementById:id=>formMap[id]}};
+const compose=vm.runInNewContext(extractedCompose,context).composeMessage();
+assert.ok(compose.startsWith('Bonjour à l’équipe de Boutique Exemple,'),"Conserver la formule d'accueil");
+assert.ok(compose.indexOf("D'ailleurs, j'ai vu que")>compose.indexOf("Je développe MAILOTION"),"Questions ajoutées après le texte");
+assert.ok(compose.indexOf("D'ailleurs, j'ai vu que")<compose.indexOf("Bonne journée"),"Questions placées avant la signature");
+assert.equal((compose.match(/\?/g)||[]).length,2,'Deux questions personnalisées');
+
+
 console.log('PASS - scripts, UI, 11 contacts + prospection, données privées, merge, conflits, dédoublonnage, schéma Google Sheets.');
