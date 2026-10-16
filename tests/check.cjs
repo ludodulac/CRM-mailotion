@@ -56,6 +56,8 @@ assert.equal(funcs.queue().length,2,'Aucune boutique déjà contactée ou invali
 assert.equal(funcs.queue()[0].id,'a','Prospect prioritaire en premier');
 assert.equal(funcs.greeting(leads[0]),'Bonjour à l’équipe de Boutique Bonjour,');
 assert.equal(funcs.greeting(leads[5]),'Bonjour Paul,');
+assert.equal(funcs.greeting({name:'ÉCHLO',contact:''}),'Bonjour à l’équipe d’ÉCHLO,');
+assert.equal(funcs.greeting({name:'Odenya',contact:''}),'Bonjour à l’équipe d’Odenya,');
 assert.equal(funcs.eligible(leads[2]),false,'Jamais proposer un email invalide');
 assert.equal(funcs.eligible(leads[3]),false,'Ne pas contacter une deuxième fois le même prospect');
 
