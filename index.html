@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#25113e"><meta name="description" content="CRM Mailotion : une application simple pour contacter les boutiques, offrir un audit gratuit et suivre les clientes.">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="CRM Mailotion">
+<link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./style.css"><title>CRM Mailotion — Mes boutiques</title>
+</head>
+<body>
+<header class="top">
+  <div class="container">
+    <div class="topline">
+      <div class="brand"><span class="brand-icon" aria-hidden="true">✦</span><span>mailotion<span class="brand-dot">.</span></span><span class="brand-tag">CRM</span></div>
+      <span class="privacy-badge" title="Les notes et le suivi restent sur cet appareil">● Données locales</span>
+    </div>
+    <div class="hero"><div><p class="eyebrow">MON ESPACE PROSPECTION</p><h1>Mes boutiques<span class="heading-dot">.</span></h1><p class="hero-sub">Des contacts bien rangés. Une aide gratuite pour commencer. Et un suivi simple quand une boutique devient cliente.</p></div>
+    <button type="button" class="button button-white hero-add" id="addTop">＋ Nouvelle boutique</button></div>
+  </div>
+</header>
+<main class="container">
+ <section class="stats" aria-label="Résumé des contacts">
+   <button class="stat" data-summary="all" type="button"><span class="stat-name">Boutiques</span><strong id="totalCount">0</strong><span class="stat-sub">dans mon carnet</span></button>
+   <button class="stat" data-summary="todo" type="button"><span class="stat-name">À contacter</span><strong id="todoCount">0</strong><span class="stat-sub">pour prendre contact</span></button>
+   <button class="stat" data-summary="free" type="button"><span class="stat-name">Aide gratuite</span><strong id="freeCount">0</strong><span class="stat-sub">en cours</span></button>
+   <button class="stat" data-summary="clients" type="button"><span class="stat-name">Clientes</span><strong id="clientCount">0</strong><span class="stat-sub">offre payante</span></button>
+ </section>
+ <section class="board">
+  <div class="section-heading"><div><p class="eyebrow accent">CARNET D'ADRESSES</p><h2>Suivi des boutiques</h2></div><div class="sync-status" id="syncStatus">○ Prêt</div></div>
+  <div class="controls">
+    <label class="searchbox"><span aria-hidden="true">⌕</span><input type="search" id="search" autocomplete="off" placeholder="Rechercher une boutique, une ville, un mail…" aria-label="Rechercher une boutique"></label>
+    <button class="button button-secondary" type="button" id="syncBtn" title="Chercher les boutiques ajoutées depuis ChatGPT">↻ <span>Actualiser</span></button>
+    <button class="button button-secondary" type="button" id="importBtn">⇩ <span>Importer</span></button>
+  </div>
+  <div class="tabs" role="group" aria-label="Filtrer par étape">
+     <button class="tab active" type="button" data-stage="all">Toutes <span data-tabcount="all">0</span></button>
+     <button class="tab" type="button" data-stage="a_contacter">À contacter <span data-tabcount="a_contacter">0</span></button>
+     <button class="tab" type="button" data-stage="contactee">Contactées <span data-tabcount="contactee">0</span></button>
+     <button class="tab" type="button" data-stage="echange">En discussion <span data-tabcount="echange">0</span></button>
+     <button class="tab" type="button" data-stage="gratuit">Aide gratuite <span data-tabcount="gratuit">0</span></button>
+     <button class="tab" type="button" data-stage="offre">Offre payante <span data-tabcount="offre">0</span></button>
+     <button class="tab" type="button" data-stage="cliente">Clientes <span data-tabcount="cliente">0</span></button>
+     <button class="tab" type="button" data-stage="sans_suite">Sans suite <span data-tabcount="sans_suite">0</span></button>
+     <button class="tab" type="button" data-stage="relance">⏰ À relancer <span data-tabcount="relance">0</span></button>
+  </div>
+  <div class="result-row"><span id="resultCount">0 boutique</span><button class="link-button" id="exportBtn" type="button">Exporter les contacts ↗</button></div>
+  <div class="cards" id="cards" aria-live="polite"></div>
+  <div class="empty" id="empty"><div class="empty-icon" aria-hidden="true">✦</div><h3 id="emptyTitle">C'est parti pour la prospection !</h3><p id="emptyText">Ajoute une boutique pour commencer. Tu peux aussi demander à une conversation ChatGPT d'ajouter des boutiques dans ton dépôt GitHub.</p><button class="button button-primary" type="button" id="emptyAdd">＋ Ajouter une boutique</button></div>
+ </section>
+ <section class="bottom-help">
+    <div class="help-symbol" aria-hidden="true">↗</div>
+    <div><h2>Ajouter des boutiques depuis ChatGPT</h2><p>Tu peux demander à une autre conversation d'ajouter des <b>coordonnées professionnelles publiques</b> dans le fichier <code>prospects.json</code> de ton dépôt. Les nouvelles boutiques apparaîtront ici avec « Actualiser », sans écraser tes notes privées.</p>
+    <button type="button" class="button button-outline" id="copyPrompt">Copier la consigne à envoyer à ChatGPT</button></div>
+ </section>
+ <div class="footer"><span>CRM Mailotion • Uniquement pour ta prospection</span><button type="button" class="link-button" id="backupBtn">Sauvegarder tout mon CRM</button><button type="button" class="link-button" id="restoreBtn">Restaurer une sauvegarde</button><input id="restoreInput" type="file" accept=".json,application/json" hidden></div>
+</main>
+<dialog id="leadDialog" class="dialog">
+ <form id="leadForm" novalidate><div class="dialog-head"><div><p class="eyebrow accent">FICHE CONTACT</p><h2 id="dialogTitle">Nouvelle boutique</h2></div><button type="button" class="close-btn" data-close="leadDialog" aria-label="Fermer">×</button></div>
+ <div class="dialog-scroll">
+   <div class="form-grid">
+    <div class="field span2"><label for="fName">Nom de la boutique <em>*</em></label><input id="fName" maxlength="160" required placeholder="Ex. Boutique Lila"></div>
+    <div class="field"><label for="fCity">Ville</label><input id="fCity" maxlength="90" placeholder="Ex. Brest"></div>
+    <div class="field"><label for="fSector">Univers / activité</label><input id="fSector" maxlength="100" placeholder="Ex. Cosmétiques naturels"></div>
+    <div class="field span2"><label for="fWebsite">Site Internet</label><input id="fWebsite" maxlength="300" inputmode="url" placeholder="https://..."></div>
+    <div class="field"><label for="fEmail">Email professionnel</label><input id="fEmail" maxlength="240" type="email" inputmode="email" placeholder="contact@boutique.fr"></div>
+    <div class="field"><label for="fPhone">Téléphone professionnel</label><input id="fPhone" maxlength="55" inputmode="tel" placeholder="02 98…"></div>
+    <div class="field span2"><label for="fContact">Interlocuteur ou service</label><input id="fContact" maxlength="130" placeholder="Ex. Service e-commerce"></div>
+    <div class="field"><label for="fStage">Où j'en suis</label><select id="fStage"></select></div>
+    <div class="field"><label for="fFollowup">Date de relance</label><input id="fFollowup" type="date"></div>
+    <div class="field"><label for="fLast">Dernier contact</label><input id="fLast" type="date"></div>
+    <div class="field"><label for="fOffer">Montant proposé (€)</label><input id="fOffer" inputmode="decimal" type="number" step="0.01" min="0" placeholder="Facultatif"></div>
+    <div class="field span2"><label for="fHelp">Ce que je propose à cette boutique</label><textarea id="fHelp" maxlength="2000" placeholder="Ex. Audit gratuit des emails de bienvenue, panier abandonné, après-achat…"></textarea></div>
+    <div class="field span2"><label for="fNotes">Notes privées / prochaine action</label><textarea id="fNotes" maxlength="4000" placeholder="Échanges, besoins, idées, suite à donner…"></textarea><small>Ces notes restent sur cet appareil, pas sur GitHub.</small></div>
+    <div class="field span2"><label for="fSource">Source de la fiche (facultatif)</label><input id="fSource" maxlength="320" placeholder="Lien public où les coordonnées ont été trouvées"></div>
+   </div>
+ </div>
+ <div class="dialog-actions"><button type="button" id="deleteBtn" class="button button-danger">Supprimer</button><span class="spacer"></span><button type="button" class="button button-secondary" data-close="leadDialog">Annuler</button><button type="submit" class="button button-primary">Enregistrer</button></div></form>
+</dialog>
+<dialog id="importDialog" class="dialog import-dialog">
+ <div class="dialog-head"><div><p class="eyebrow accent">AJOUTER DES CONTACTS</p><h2>Importer des boutiques</h2></div><button type="button" class="close-btn" data-close="importDialog" aria-label="Fermer">×</button></div>
+ <div class="dialog-scroll"><p class="subtext">Colle un tableau CSV (avec en-têtes) ou une liste JSON ; ou sélectionne un fichier CSV/JSON. Les doublons sont évités automatiquement.</p>
+ <div class="field"><label for="importText">Coller des données</label><textarea id="importText" rows="8" placeholder='boutique;ville;email;telephone;site
+Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textarea></div>
+ <div class="import-row"><button class="button button-outline" type="button" id="importFileBtn">📁 Choisir un fichier</button><input type="file" id="importFile" accept=".json,.csv,.txt,text/csv,application/json" hidden><span id="importFileName">CSV ou JSON</span></div>
+ <div class="notice"><b>Confidentialité :</b> les boutiques saisies directement ici, leur suivi et tes notes sont uniquement enregistrés dans ce navigateur. Si tu demandes à ChatGPT d'écrire dans <code>prospects.json</code> sur GitHub, <b>ces coordonnées professionnelles seront publiques</b>. N'y ajoute pas de données personnelles ou de notes confidentielles.</div></div>
+ <div class="dialog-actions"><button class="button button-secondary" type="button" data-close="importDialog">Annuler</button><button class="button button-primary" type="button" id="importConfirm">Importer</button></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite" class="toast"></div>
+<script src="./app.js" defer></script>
+</body></html>
