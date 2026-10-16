@@ -1,0 +1,14 @@
+name: CRM Mailotion — contrôles
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exécuter les contrôles sans données privées
+        run: node tests/check.cjs
