@@ -1,4 +1,98 @@
 {
   "version": 1,
-  "boutiques": []
+  "boutiques": [
+    {
+      "id": "echlo-cosmetique",
+      "boutique": "ÉCHLO",
+      "ville": "Saint-Cloud",
+      "secteur": "Cosmétiques naturels",
+      "email": "contact@echlo-cosmetique.fr",
+      "telephone": "06 45 59 32 26",
+      "site": "https://echlo-cosmetique.fr",
+      "source_url": "https://echlo-cosmetique.fr/contact/"
+    },
+    {
+      "id": "sous-lecorce",
+      "boutique": "Sous l’Écorce",
+      "secteur": "Cosmétiques naturels",
+      "email": "contact@sous-lecorce.fr",
+      "site": "https://www.sous-l-ecorce.fr",
+      "source_url": "https://www.sous-l-ecorce.fr/contact/"
+    },
+    {
+      "id": "cle-des-champs",
+      "boutique": "Clé des Champs",
+      "secteur": "Cosmétiques bio",
+      "email": "contact@cledeschamps.eu",
+      "telephone": "04 74 60 36 22",
+      "site": "https://www.cledeschamps.eu",
+      "source_url": "https://www.cledeschamps.eu/cosmetiques-bio/"
+    },
+    {
+      "id": "symphytum",
+      "boutique": "Symphytum",
+      "ville": "Caden",
+      "secteur": "Cosmétiques naturels",
+      "email": "c.symphytum@gmail.com",
+      "telephone": "06 73 67 77 20",
+      "site": "https://symphytum.fr",
+      "source_url": "https://symphytum.fr/contact-cosmetique-symphytum/"
+    },
+    {
+      "id": "fleurs-de-cafe",
+      "boutique": "Fleurs de Café",
+      "ville": "Dammarie-lès-Lys",
+      "secteur": "Cosmétiques naturels",
+      "telephone": "07 62 92 82 86",
+      "site": "https://fleursdecafe.fr",
+      "source_url": "https://fleursdecafe.fr/"
+    },
+    {
+      "id": "kale-paris",
+      "boutique": "KALE Paris",
+      "ville": "Saint-Maur-des-Fossés",
+      "secteur": "Cosmétiques naturels",
+      "email": "contact@kaleparis.com",
+      "telephone": "01 43 39 44 84",
+      "site": "https://www.kaleparis.com",
+      "source_url": "https://www.kaleparis.com/"
+    },
+    {
+      "id": "nansca",
+      "boutique": "Nansca",
+      "ville": "Thusy",
+      "secteur": "Cosmétiques naturels",
+      "email": "contact@nansca.com",
+      "telephone": "06 82 90 37 47",
+      "site": "https://nansca.com",
+      "source_url": "https://nansca.com/contact"
+    },
+    {
+      "id": "la-canopee",
+      "boutique": "La Canopée",
+      "secteur": "Cosmétiques naturels",
+      "email": "serviceclient@la-canopee.com",
+      "telephone": "04 93 36 14 99",
+      "site": "https://www.la-canopee.com",
+      "source_url": "https://www.la-canopee.com/pages/contact"
+    },
+    {
+      "id": "odenya",
+      "boutique": "Odenya",
+      "ville": "Tarbes",
+      "secteur": "Cosmétiques bio",
+      "email": "contact@odenya.fr",
+      "telephone": "06 56 68 52 29",
+      "site": "https://odenya.fr",
+      "source_url": "https://odenya.fr/contact/"
+    },
+    {
+      "id": "caliece",
+      "boutique": "Calièce",
+      "secteur": "Cosmétiques naturels",
+      "telephone": "06 74 77 07 03",
+      "site": "https://caliece.fr",
+      "source_url": "https://caliece.fr/contact/"
+    }
+  ]
 }
