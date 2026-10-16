@@ -61,6 +61,14 @@ function sanitize(raw,source='local'){
  offer:txt(get(raw,['offer','prix','montant','devis']),35),
  help:txt(get(raw,['help','aide','prestation']),2000),
  notes:txt(get(raw,['notes','note','commentaire']),4000),
+ contactPage:txt(raw.contactPage||'',340), verifiedAt:isoDate(raw.verifiedAt), emailTool:txt(raw.emailTool||'',110),
+ problems:txt(raw.problems||'',3500), opportunities:txt(raw.opportunities||'',3500),
+ priority:['haute','moyenne','basse'].includes(raw.priority)?raw.priority:'',
+ qualification:txt(raw.qualification||'',120),
+ emailStatus:['trouve_non_teste','confirme','invalide','alternatif_a_tester'].includes(raw.emailStatus)?raw.emailStatus:'',
+ lastAction:txt(raw.lastAction||'',1000), nextAction:txt(raw.nextAction||'',1200),
+ proposalSent:raw.proposalSent===true,freeInProgress:raw.freeInProgress===true,
+ paidOffer:txt(raw.paidOffer||'',300),clientAcquired:raw.clientAcquired===true,
  origin:source==='github'?'github':'local',
  createdAt:txt(raw.createdAt,30)||new Date().toISOString(),
  updatedAt:txt(raw.updatedAt,30)||new Date().toISOString()
@@ -69,7 +77,7 @@ function sanitize(raw,source='local'){
 function fingerprint(r){return norm(r.name)+'|'+norm(r.city)}
 function findMatch(record){return state.records.find(r=>r.id===record.id||(r.name&&fingerprint(r)===fingerprint(record)))}
 function persist(){
- try{localStorage.setItem(KEY,JSON.stringify({version:1,records:state.records,deleted:state.deleted,exportedAt:new Date().toISOString()}));return true}
+ try{localStorage.setItem(KEY,JSON.stringify({version:1,records:state.records,deleted:state.deleted,exportedAt:new Date().toISOString()}));window.dispatchEvent(new CustomEvent('mailotion:changed'));return true}
  catch(e){toast('Espace de stockage saturé : sauvegarde tes données en JSON.');return false}
 }
 function load(){
@@ -136,11 +144,11 @@ function render(){
  }
 }
 function cardHtml(r){
- const site=webUrl(r.website), mail=emailUrl(r.email,r.name),phone=phoneUrl(r.phone);
+ const site=webUrl(r.website), mail=r.emailStatus==='invalide'?'':emailUrl(r.email,r.name),phone=phoneUrl(r.phone);
  const citySector=[r.city,r.sector].filter(Boolean).join(' · ')||'Boutique e-commerce';
  const initial=txt(r.name).split(/\s+/).slice(0,2).map(s=>s.slice(0,1)).join('').toUpperCase();
  const relance=r.followup?'<span class="deadline '+(isFollowup(r)?'overdue':'')+'">⏰ '+(isFollowup(r)?'À relancer':'Relance')+' : '+esc(displayDate(r.followup))+'</span>':'';
- const quickInfo=[r.email?'<span class="contact-mini">✉ '+esc(r.email)+'</span>':'',r.phone?'<span class="contact-mini">☎ '+esc(r.phone)+'</span>':''].filter(Boolean).join('');
+ const quickInfo=[r.email?'<span class="contact-mini">✉ '+esc(r.email)+(r.emailStatus==='invalide'?' · invalide':r.emailStatus==='alternatif_a_tester'?' · à tester':'')+'</span>':'',r.phone?'<span class="contact-mini">☎ '+esc(r.phone)+'</span>':''].filter(Boolean).join('');
  const link=(href,label,style)=>href?'<a class="action '+(style||'')+'" href="'+esc(href)+'" '+(href.startsWith('http')?'target="_blank" rel="noopener noreferrer"':'')+'>'+label+'</a>':'<span class="action disabled" aria-disabled="true">'+label+'</span>';
  return '<article class="lead-card" data-id="'+esc(r.id)+'">'+
  '<div class="card-head"><div class="avatar" aria-hidden="true">'+esc(initial)+'</div>'+
@@ -160,14 +168,14 @@ function edit(id){
  const record=state.records.find(r=>r.id===id);
  state.editing=record?record.id:null;
  $('dialogTitle').textContent=record?'Modifier la boutique':'Nouvelle boutique';
- const fields={Name:'name',City:'city',Sector:'sector',Website:'website',Email:'email',Phone:'phone',Contact:'contact',Stage:'stage',Followup:'followup',Last:'lastContact',Offer:'offer',Help:'help',Notes:'notes',Source:'sourceUrl'};
- for(const [f,k] of Object.entries(fields))$('f'+f).value=record?(record[k]||''):(k==='stage'?'a_contacter':'');
+ const fields={Name:'name',City:'city',Sector:'sector',Website:'website',Email:'email',Phone:'phone',Contact:'contact',Stage:'stage',Followup:'followup',Last:'lastContact',Offer:'offer',Help:'help',Notes:'notes',Source:'sourceUrl',ContactPage:'contactPage',VerifiedAt:'verifiedAt',EmailTool:'emailTool',Problems:'problems',Opportunities:'opportunities',Priority:'priority',Qualification:'qualification',EmailStatus:'emailStatus',LastAction:'lastAction',NextAction:'nextAction',PaidOffer:'paidOffer',ProposalSent:'proposalSent',FreeInProgress:'freeInProgress',ClientAcquired:'clientAcquired'};
+ for(const [f,k] of Object.entries(fields)){const el=$('f'+f);if(!el)continue;if(el.type==='checkbox')el.checked=record?!!record[k]:false;else el.value=record?(record[k]||''):(k==='stage'?'a_contacter':'')}
  $('deleteBtn').hidden=!record;
  showDialog($('leadDialog'));
  setTimeout(()=>$('fName').focus(),120);
 }
 function readForm(){
- return {name:$('fName').value,city:$('fCity').value,sector:$('fSector').value,website:$('fWebsite').value,email:$('fEmail').value,phone:$('fPhone').value,contact:$('fContact').value,stage:$('fStage').value,followup:$('fFollowup').value,lastContact:$('fLast').value,offer:$('fOffer').value,help:$('fHelp').value,notes:$('fNotes').value,sourceUrl:$('fSource').value};
+ return {name:$('fName').value,city:$('fCity').value,sector:$('fSector').value,website:$('fWebsite').value,email:$('fEmail').value,phone:$('fPhone').value,contact:$('fContact').value,stage:$('fStage').value,followup:$('fFollowup').value,lastContact:$('fLast').value,offer:$('fOffer').value,help:$('fHelp').value,notes:$('fNotes').value,sourceUrl:$('fSource').value,contactPage:$('fContactPage').value,verifiedAt:$('fVerifiedAt').value,emailTool:$('fEmailTool').value,problems:$('fProblems').value,opportunities:$('fOpportunities').value,priority:$('fPriority').value,qualification:$('fQualification').value,emailStatus:$('fEmailStatus').value,lastAction:$('fLastAction').value,nextAction:$('fNextAction').value,paidOffer:$('fPaidOffer').value,proposalSent:$('fProposalSent').checked,freeInProgress:$('fFreeInProgress').checked,clientAcquired:$('fClientAcquired').checked};
 }
 function handleForm(ev){
  ev.preventDefault();
@@ -176,6 +184,7 @@ function handleForm(ev){
  if(input.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())){toast("L'adresse email semble incorrecte.");$('fEmail').focus();return}
  const existing=state.editing?state.records.find(r=>r.id===state.editing):null;
  const lead=sanitize({...(existing||{}),...input,id:existing?.id||makeId(),origin:existing?.origin||'local',createdAt:existing?.createdAt||new Date().toISOString()},existing?.origin||'local');
+ lead.updatedAt=new Date().toISOString();
  if(!lead)return;
  const duplicate=state.records.find(r=>r.id!==lead.id&&fingerprint(r)===fingerprint(lead));
  if(duplicate){toast('Cette boutique est déjà enregistrée. Ouvre sa fiche pour la modifier.');return}
@@ -254,7 +263,7 @@ async function importHash(){
  }catch(e){toast("Impossible d'importer ce lien.");}
 }
 function install(){
- fillStageOptions();load();render();
+ fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId};
  $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
  for(const b of document.querySelectorAll('[data-stage]'))b.addEventListener('click',()=>filterTo(b.dataset.stage));
  for(const b of document.querySelectorAll('[data-summary]'))b.addEventListener('click',()=>filterTo({todo:'a_contacter',free:'gratuit',clients:'cliente'}[b.dataset.summary]||'all'));
