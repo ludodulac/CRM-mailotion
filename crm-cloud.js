@@ -216,9 +216,14 @@ async function syncCloud({initial=false}={}){
  }finally{state.busy=false;$('cloudConnect').disabled=false}
 }
 function scheduleCloud(){
- if(state.applying||!state.connected)return;
- state.dirty=true;clearTimeout(timer);
- timer=setTimeout(()=>syncCloud(),1250);
+ if(state.applying)return;
+ state.dirty=true;
+ if(!state.connected||!tokenReady()){
+   showCloud('● Modifications locales non synchronisées. Appuie sur Connecter Google pour les envoyer.','error');
+   state.connected=false;return;
+ }
+ showCloud('● Enregistrement des changements dans Google en attente…');
+ clearTimeout(timer);timer=setTimeout(()=>syncCloud(),1250);
 }
 function trackLocal(){
  if(state.applying)return;
@@ -365,6 +370,10 @@ function addUIEvents(){
  $('backupBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();exportAll()},true);
  $('restoreInput').addEventListener('change',async e=>{e.stopImmediatePropagation();if(e.target.files?.[0])await restoreAll(e.target.files[0]);e.target.value=''},true);
   $('cloudConnect').addEventListener('click',connect);
+ $('cloudConfigBtn').addEventListener('click',()=>{$('cloudSettings').hidden=!$('cloudSettings').hidden});
+ document.addEventListener('visibilitychange',()=>{
+   if(document.visibilityState==='visible'&&state.connected&&tokenReady()&&!state.busy){clearTimeout(actionTimer);actionTimer=setTimeout(()=>syncCloud(),700)}
+ });
  $('cloudSaveSettings').addEventListener('click',()=>{if(saveSettings())$('cloudSettings').hidden=true});
  $('cloudSettings').hidden=!!(state.client&&state.sheet);
  $('cloudMessage').addEventListener('click',()=>{$('cloudSettings').hidden=!$('cloudSettings').hidden});
