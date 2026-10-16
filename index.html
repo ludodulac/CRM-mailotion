@@ -58,7 +58,7 @@
  </section>
  <section class="bottom-help">
     <div class="help-symbol" aria-hidden="true">↗</div>
-    <div><h2>Ajouter des boutiques depuis ChatGPT</h2><p>Tu peux demander à une autre conversation d'ajouter des <b>coordonnées professionnelles publiques</b> dans le fichier <code>prospects.json</code> de ton dépôt. Les nouvelles boutiques apparaîtront ici avec « Actualiser », sans écraser tes notes privées.</p>
+    <div><h2>ChatGPT et moi : un seul suivi commercial</h2><p>Les informations privées sont enregistrées dans un <b>Google Sheets personnel non public</b>, accessible à ChatGPT via le connecteur Google Drive. Demande-lui d’y enregistrer les boutiques, échanges et relances. Puis utilise <strong>Connecter Google</strong> pour récupérer les modifications. Sans connexion, le téléphone conserve une copie locale.</p>
     <button type="button" class="button button-outline" id="copyPrompt">Copier la consigne à envoyer à ChatGPT</button></div>
  </section>
  <div class="footer"><span>CRM Mailotion • Uniquement pour ta prospection</span><button type="button" class="link-button" id="backupBtn">Sauvegarder tout mon CRM</button><button type="button" class="link-button" id="restoreBtn">Restaurer une sauvegarde</button><input id="restoreInput" type="file" accept=".json,application/json" hidden></div>
@@ -105,7 +105,7 @@
  <div class="field"><label for="importText">Coller des données</label><textarea id="importText" rows="8" placeholder='boutique;ville;email;telephone;site
 Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textarea></div>
  <div class="import-row"><button class="button button-outline" type="button" id="importFileBtn">📁 Choisir un fichier</button><input type="file" id="importFile" accept=".json,.csv,.txt,text/csv,application/json" hidden><span id="importFileName">CSV ou JSON</span></div>
- <div class="notice"><b>Confidentialité :</b> les boutiques saisies directement ici, leur suivi et tes notes sont uniquement enregistrés dans ce navigateur. Si tu demandes à ChatGPT d'écrire dans <code>prospects.json</code> sur GitHub, <b>ces coordonnées professionnelles seront publiques</b>. N'y ajoute pas de données personnelles ou de notes confidentielles.</div></div>
+ <div class="notice"><b>Confidentialité :</b> les nouvelles fiches sont conservées localement, puis synchronisées dans ton Google Sheets privé <b>seulement après connexion</b>. Ne communique jamais de notes confidentielles dans un dépôt GitHub public.</div></div>
  <div class="dialog-actions"><button class="button button-secondary" type="button" data-close="importDialog">Annuler</button><button class="button button-primary" type="button" id="importConfirm">Importer</button></div>
 </dialog>
 <dialog class="dialog" id="actionDialog"><form id="actionForm"><div class="dialog-head"><div><p class="eyebrow accent">HISTORIQUE & TÂCHES</p><h2 id="actionTitle">Nouvelle action</h2></div><button class="close-btn" type="button" data-close-cloud="actionDialog">×</button></div>
