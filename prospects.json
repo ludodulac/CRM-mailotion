@@ -93,6 +93,18 @@
       "telephone": "06 74 77 07 03",
       "site": "https://caliece.fr",
       "source_url": "https://caliece.fr/contact/"
+    },
+    {
+      "id": "tasha-bijoux",
+      "boutique": "Tasha Bijoux",
+      "ville": "Issy-les-Moulineaux",
+      "secteur": "Bijoux artisanaux",
+      "email": "bijoux.tasha@gmail.com",
+      "telephone": "",
+      "site": "https://tasha.fr",
+      "source_url": "https://tasha.fr/pages/contact",
+      "notes": "Adresse contact@tasha.fr signalée comme non fonctionnelle par l'utilisateur ; alternative publique bijoux.tasha@gmail.com, à tester. Aucun téléphone public confirmé.",
+      "contact_statut": "à vérifier"
     }
   ]
 }
