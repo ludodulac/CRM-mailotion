@@ -191,7 +191,7 @@ async function syncCloud({initial=false}={}){
    }
    for(const l of localMap.values()){imported[name].push(l);pending[name].push(l)}
   }
-  if(!initial&&localDelete.size){
+  if(localDelete.size){
    for(const [id,entry] of remote.Prospects){if(localDelete.has(id)&&!entry.data.archived){pending.Prospects.push({...entry.data,archived:true,updatedAt:new Date().toISOString()})}}
   }
   const operations=pending.Prospects.length+pending.Actions.length+pending.Emails.length;
@@ -254,10 +254,14 @@ function renderToday(){
  const leads=api().state.records.filter(x=>x.followup&&x.followup<=date()&&!['cliente','sans_suite'].includes(x.stage));
  const contact=api().state.records.filter(x=>!x.lastContact&&(x.stage==='a_contacter'||!x.stage));
  const all=[...new Map([...due,...other].map(a=>[a.id,a])).values()].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+ const priority=contact.slice().sort((a,b)=>({haute:0,moyenne:1,basse:2}[a.priority]??3)-({haute:0,moyenne:1,basse:2}[b.priority]??3)).slice(0,6);
  $('todaySummary').innerHTML='<span class="today-chip">'+all.length+' actions</span><span class="today-chip late">'+late.length+' en retard</span><span class="today-chip">'+contact.length+' à contacter</span><span class="today-chip">'+leads.length+' relances prospects</span>';
  const follow=leads.map(x=>'<article class="today-card priority"><label><input type="checkbox" data-lead-finish="'+esc(x.id)+'"><span><b>Relancer '+esc(x.name)+'</b><p>Date prévue : '+format(x.followup)+(x.nextAction?' · '+esc(x.nextAction):'')+'</p></span></label><div class="today-buttons"><button data-lead-history="'+esc(x.id)+'" type="button">Historique</button></div></article>').join('');
- $('todayList').innerHTML=all.map(actionForUI).join('')+follow+
- (!all.length&&!follow?'<p class="today-empty">Aucune tâche ni relance échue. Tu peux ajouter une tâche, ou vérifier les boutiques encore jamais contactées.</p>':'');
+ const fresh=priority.map(x=>'<article class="today-card"><label><span><b>À contacter · '+esc(x.name)+'</b><p>'+(x.priority?'Priorité '+esc(x.priority)+' · ':'')+esc(x.sector||'Boutique')+(x.email?' · '+esc(x.email):'')+'</p></span></label><div class="today-buttons"><button data-lead-edit="'+esc(x.id)+'" type="button">Ouvrir</button></div></article>').join('');
+ const free=api().state.records.filter(x=>x.freeInProgress&&x.stage!=='cliente').map(x=>'<article class="today-card"><label><span><b>Aide gratuite en cours · '+esc(x.name)+'</b><p>'+esc(x.nextAction||'Suivi de la prestation gratuite')+'</p></span></label><div class="today-buttons"><button type="button" data-lead-edit="'+esc(x.id)+'">Ouvrir</button></div></article>').join('');
+ const offers=api().state.records.filter(x=>x.proposalSent&&x.stage!=='cliente'&&x.stage!=='sans_suite').map(x=>'<article class="today-card"><label><span><b>Proposition envoyée · '+esc(x.name)+'</b><p>'+esc(x.nextAction||'En attente de réponse')+'</p></span></label><div class="today-buttons"><button type="button" data-lead-edit="'+esc(x.id)+'">Ouvrir</button></div></article>').join('');
+ $('todayList').innerHTML=all.map(actionForUI).join('')+follow+free+offers+fresh+
+ (!all.length&&!follow&&!free&&!offers&&!fresh?'<p class="today-empty">Aucune tâche ni relance échue. Tu peux ajouter une tâche, ou vérifier les boutiques encore jamais contactées.</p>':'');
 }
 function selectOptions(selected=''){
  $('aProspect').innerHTML='<option value="">Choisir une boutique…</option>'+api().state.records.slice().sort((a,b)=>a.name.localeCompare(b.name,'fr')).map(x=>'<option value="'+esc(x.id)+'" '+(selected===x.id?'selected':'')+'>'+esc(x.name)+'</option>').join('');
@@ -335,8 +339,32 @@ async function connect(){
  try{showCloud('Connexion à Google…');await oauth();await syncCloud({initial:true})}
  catch(e){showCloud('Connexion impossible : '+e.message,'error');api().toast('Vérifie ton client OAuth, ton compte Google et les autorisations.')}
 }
+function exportAll(){
+ const payload={version:2,format:'mailotion-crm-private',records:api().state.records,deleted:api().state.deleted,actions:state.actions,emails:state.emails,createdAt:new Date().toISOString()};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='Mailotion_CRM_complet_'+date()+'.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),20000);
+ api().toast('✓ Sauvegarde complète téléchargée (boutiques, tâches, historiques, emails).');
+}
+async function restoreAll(file){
+ try{
+  const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.records))throw Error('Ce fichier ne contient pas de prospects.');
+  if(!confirm('Importer cette sauvegarde dans ton CRM ? Les fiches de même identifiant seront mises à jour, sans supprimer les autres.'))return;
+  let count=0;
+  for(const raw of data.records){
+   const r=api().sanitize(raw,raw.origin==='github'?'github':'local');if(!r)continue;
+   const known=api().findMatch(r);
+   if(known)Object.assign(known,r);else api().state.records.push(r);count++;
+  }
+  if(Array.isArray(data.deleted))for(const id of data.deleted)if(!api().state.deleted.includes(id))api().state.deleted.push(id);
+  if(Array.isArray(data.actions)){const m=new Map(state.actions.map(x=>[x.id,x]));for(const a of data.actions)if(a.id)m.set(a.id,a);state.actions=[...m.values()]}
+  if(Array.isArray(data.emails)){const m=new Map(state.emails.map(x=>[x.id,x]));for(const e of data.emails)if(e.id)m.set(e.id,e);state.emails=[...m.values()]}
+  api().persist();saveLocal();api().render();renderToday();scheduleCloud();api().toast('✓ '+count+' fiche(s) importée(s) et historique conservé.');
+ }catch(e){api().toast('Restauration impossible : '+e.message)}
+}
 function addUIEvents(){
- $('cloudConnect').addEventListener('click',connect);
+ $('backupBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();exportAll()},true);
+ $('restoreInput').addEventListener('change',async e=>{e.stopImmediatePropagation();if(e.target.files?.[0])await restoreAll(e.target.files[0]);e.target.value=''},true);
+  $('cloudConnect').addEventListener('click',connect);
  $('cloudSaveSettings').addEventListener('click',()=>{if(saveSettings())$('cloudSettings').hidden=true});
  $('cloudSettings').hidden=!!(state.client&&state.sheet);
  $('cloudMessage').addEventListener('click',()=>{$('cloudSettings').hidden=!$('cloudSettings').hidden});
@@ -346,6 +374,7 @@ function addUIEvents(){
    if(b.dataset.actionEdit)openAction(b.dataset.actionEdit);
    else if(b.dataset.taskDelay)postponeAction(b.dataset.taskDelay);
    else if(b.dataset.leadHistory)showTimeline(b.dataset.leadHistory);
+   else if(b.dataset.leadEdit)api().edit(b.dataset.leadEdit);
   }
  });
  $('todayList').addEventListener('change',event=>{
