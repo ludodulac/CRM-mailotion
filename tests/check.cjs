@@ -3,14 +3,14 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const read=name=>fs.readFileSync(name,'utf8');
 const html=read('index.html'),app=read('app.js'),cloud=read('crm-cloud.js');
-const ids=[...html.matchAll(/\\bid="([^"]+)"/g)].map(m=>m[1]);
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(ids.length,new Set(ids).size,'IDs HTML uniques');
 for(const name of ['app.js','crm-cloud.js','sw.js'])new Function(read(name));
-for(const [,id] of [...app.matchAll(/\\$\\('([^']+)'\\)/g),...cloud.matchAll(/\\$\\('([^']+)'\\)/g)])assert.ok(ids.includes(id),'Champ '+id+' existe dans HTML');
+for(const [,id] of [...app.matchAll(/\$\('([^']+)'\)/g),...cloud.matchAll(/\$\('([^']+)'\)/g)])assert.ok(ids.includes(id),'Champ '+id+' existe dans HTML');
 const publicData=JSON.parse(read('prospects.json'));
 assert.equal(publicData.boutiques.length,11,'Les 11 prospects publics initiaux sont conservés');
 for(const b of publicData.boutiques){assert.equal(b.notes,undefined,'Pas de notes privées dans GitHub');assert.equal(b.contact_statut,undefined,'Pas de statut privé dans GitHub');}
-const replaced=cloud.replace(/if\\(document\\.readyState==='loading'\\)document\\.addEventListener\\('DOMContentLoaded',init,\\{once:true\\}\\);else init\\(\\);\\n\\}\\)\\(\\);/, 'return {mergeRecord,deduplicate,values,fp};\\n})();');
+const replaced=cloud.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/, 'return {mergeRecord,deduplicate,values,fp};\n})();');
 assert.notEqual(replaced,cloud,'Test extraction fonctions cloud');
 const store={};
 const env={localStorage:{getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v},window:{MailotionCRM:{sanitize:r=>r}}};
