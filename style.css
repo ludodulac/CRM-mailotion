@@ -70,3 +70,16 @@ main.container{margin-top:-54px;position:relative}.stats{display:grid;grid-templ
 .outreach-footnote{font-size:11px;color:#83788e;line-height:1.67;margin:14px 0 0;padding:12px;background:#f8f6fb;border-radius:11px}
 @media(max-width:850px){.outreach-grid{grid-template-columns:1fr}.outreach-email-preview{max-width:none}}
 @media(max-width:600px){.outreach-panel{padding:16px 12px;border-radius:17px}.outreach-head{align-items:flex-start;flex-direction:column;gap:9px}.outreach-head h2{font-size:20px}.outreach-editor .field textarea{min-height:310px}.outreach-preview-header{padding:11px}.outreach-preview-subject{padding:13px}#outreachPreviewBody{font-size:13px;padding:14px;max-height:450px}}
+
+
+.outreach-research{background:#f7f3fc;border:1px solid #e8daf8;padding:15px;border-radius:13px;margin-top:16px}
+.outreach-research-head{display:flex;align-items:start;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.outreach-research-head b{font-size:12px;color:#473261;display:block;margin-bottom:3px}
+.outreach-research-head small{font-size:11px;color:#86788c;display:block}
+.outreach-research-badge{font-size:10px;color:#9a6d37;background:#ffecda;border-radius:30px;padding:6px 8px;font-weight:850}
+.outreach-research-badge.ready{background:#e2f4e9;color:#37775e}
+.outreach-research-note{font-size:11px;line-height:1.6;color:#756681;margin:10px 0 15px;border-left:3px solid #cfb8e9;padding-left:10px}
+.outreach-research #outreachPersonal{background:#fff;min-height:146px;resize:vertical}
+#outreachSource{font-size:11px;font-weight:800;color:#6e42b9;display:inline-block;margin-top:1px;text-underline-offset:3px}
+#outreachSource[hidden]{display:none}
+.outreach-research-help{font-size:10.5px;color:#8e7c9c;line-height:1.6;margin:12px 0 0}
