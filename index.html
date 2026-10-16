@@ -29,6 +29,42 @@
  <div class="section-heading"><div><p class="eyebrow accent">CENTRE DE SUIVI</p><h2>☀ AUJOURD'HUI</h2><p class="today-sub">Mes actions, mes relances et les prochaines étapes.</p></div><button type="button" id="todayAdd" class="button button-primary">＋ Ajouter une tâche</button></div>
  <div id="todaySummary" class="today-summary"></div><div id="todayList" class="today-list"><p class="subtext">Chargement des tâches…</p></div>
  </section>
+ <section class="outreach-panel" id="outreachPanel" aria-labelledby="outreachTitle">
+  <div class="outreach-head">
+   <div><p class="eyebrow accent">PROSPECTION PAR EMAIL</p><h2 id="outreachTitle">✉ Mes emails de prospection</h2><p class="today-sub">Le message qui t'a servi à trouver tes premiers échanges, adapté à chaque boutique. Un email à la fois.</p></div>
+   <span class="outreach-count" id="outreachCount">Chargement…</span>
+  </div>
+  <div class="outreach-grid">
+   <div class="outreach-left">
+    <div class="outreach-selection">
+     <label for="outreachLead">Boutique à contacter</label>
+     <select id="outreachLead" aria-label="Choisir la prochaine boutique"></select>
+     <div class="outreach-recipient" id="outreachRecipient">Préparation des contacts…</div>
+     <div id="outreachWarning" class="outreach-warning" hidden></div>
+     <button class="button button-secondary" type="button" id="outreachSkip">→ Passer à la boutique suivante</button>
+    </div>
+    <div class="outreach-editor">
+     <div class="field"><label for="outreachGreeting">Formule d'accueil <small>(modifiable)</small></label><input id="outreachGreeting" maxlength="190" placeholder="Bonjour à l'équipe de cette boutique,"></div>
+     <div class="field"><label for="outreachSubject">Objet de l'email</label><input id="outreachSubject" maxlength="200" placeholder="Une petite proposition pour votre boutique"></div>
+     <div class="field"><label for="outreachBody">Message commun <small>(personnalisable et mémorisé sur ce téléphone)</small></label><textarea id="outreachBody" rows="14" maxlength="4000" spellcheck="true"></textarea></div>
+     <div class="outreach-editor-foot"><span id="outreachSaved">✓ Modèle enregistré</span><button id="outreachReset" type="button">Réinitialiser le texte</button></div>
+    </div>
+   </div>
+   <div class="outreach-right">
+    <div class="outreach-email-preview">
+     <div class="outreach-preview-header"><span>APERÇU AVANT ENVOI</span><span class="outreach-live">● PERSONNALISÉ</span></div>
+     <div class="outreach-preview-subject"><strong id="outreachPreviewSubject"></strong><small id="outreachPreviewTo"></small></div>
+     <pre id="outreachPreviewBody"></pre>
+    </div>
+    <div class="outreach-send-actions">
+     <a class="button button-primary outreach-compose" id="outreachCompose" href="#" role="button">✉ Ouvrir dans mon application mail</a>
+     <button type="button" class="button button-secondary" id="outreachConfirm" disabled>✓ J'ai envoyé cet email — Enregistrer</button>
+    </div>
+    <label class="outreach-follow"><input type="checkbox" id="outreachFollowup"> Me rappeler de relancer dans 5 jours <small>(aucun email automatique)</small></label>
+    <p class="outreach-footnote">L'application ouvre un brouillon dans ta messagerie : <strong>elle n'envoie rien toute seule</strong>. Après avoir réellement cliqué sur Envoyer, reviens ici et confirme. Le CRM enregistrera l'envoi dans l'historique privé, puis passera au contact suivant.</p>
+   </div>
+  </div>
+ </section>
  <section class="cloud-panel" id="cloudPanel">
  <div class="cloud-title"><div><b>☁ Mémoire partagée ChatGPT</b><p id="cloudMessage">Non connectée : les contacts sont encore sauvegardés uniquement sur ton téléphone.</p></div><div class="cloud-actions"><button class="button button-secondary" id="cloudConfigBtn" type="button" aria-label="Configurer Google">⚙</button><button class="button button-primary" id="cloudConnect" type="button">Connecter Google</button></div></div>
  <div class="cloud-settings" id="cloudSettings" hidden><div class="field"><label for="cloudClientId">Identifiant OAuth Google (non secret)</label><input id="cloudClientId" type="text" autocomplete="off" placeholder="…apps.googleusercontent.com"></div><div class="field"><label for="cloudSheetId">Identifiant du tableau privé Google Sheets</label><input id="cloudSheetId" type="text" autocomplete="off" placeholder="Identifiant de la feuille privée"></div><div class="cloud-actions"><button type="button" class="button button-secondary" id="cloudSaveSettings">Enregistrer la configuration</button><button type="button" class="button button-secondary" id="cloudRecoveryBtn">📦 Sauvegarde avant migration</button><button type="button" class="button button-secondary" id="cloudConflictsBtn">⚠ Copies de conflits</button><a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener noreferrer">Créer l'identifiant OAuth ↗</a></div></div>
@@ -121,5 +157,5 @@ Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textar
  <dialog class="dialog" id="timelineDialog"><div class="dialog-head"><div><p class="eyebrow accent">CHRONOLOGIE</p><h2 id="timelineTitle">Historique</h2></div><button type="button" class="close-btn" data-close-cloud="timelineDialog">×</button></div><div class="dialog-scroll"><div id="timelineBody"></div></div><div class="dialog-actions"><button id="timelineAdd" type="button" class="button button-primary">＋ Ajouter une action</button></div></dialog>
  <dialog class="dialog" id="emailDialog"><div class="dialog-head"><div><p class="eyebrow accent">SUIVI DES ADRESSES</p><h2 id="emailTitle">Historique des emails</h2></div><button type="button" class="close-btn" data-close-cloud="emailDialog">×</button></div><div class="dialog-scroll"><div id="emailList"></div><form id="emailForm" class="form-grid"><div class="field span2"><label for="eValue">Email professionnel</label><input type="email" id="eValue" required></div><div class="field"><label for="eStatus">Statut</label><select id="eStatus"><option value="trouve_non_teste">Trouvé, non testé</option><option value="confirme">Fonctionnel confirmé</option><option value="invalide">Invalide</option><option value="alternatif_a_tester">Alternatif à tester</option></select></div><div class="field"><label for="eVerified">Vérifié le</label><input type="date" id="eVerified"></div><div class="field span2"><label for="eNotes">Observations</label><textarea id="eNotes" maxlength="2000"></textarea></div><div class="field span2"><button class="button button-primary" type="submit">＋ Enregistrer cette adresse</button></div></form></div></dialog>
  <div id="toast" role="status" aria-live="polite" class="toast"></div>
-<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script>
+<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script>
 </body></html>
