@@ -366,10 +366,19 @@ async function restoreAll(file){
   api().persist();saveLocal();api().render();renderToday();scheduleCloud();api().toast('✓ '+count+' fiche(s) importée(s) et historique conservé.');
  }catch(e){api().toast('Restauration impossible : '+e.message)}
 }
+function exportSaved(key,name){
+ try{const data=localStorage.getItem(key);if(!data){api().toast('Aucune copie de ce type n’a encore été enregistrée.');return}
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+ a.href=url;a.download=name+'_'+date()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);
+ api().toast('Copie de sécurité exportée en JSON.');
+ }catch(e){api().toast('Impossible de récupérer cette sauvegarde.')}
+}
 function addUIEvents(){
  $('backupBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();exportAll()},true);
  $('restoreInput').addEventListener('change',async e=>{e.stopImmediatePropagation();if(e.target.files?.[0])await restoreAll(e.target.files[0]);e.target.value=''},true);
   $('cloudConnect').addEventListener('click',connect);
+ $('cloudRecoveryBtn').addEventListener('click',()=>exportSaved(MIG,'Mailotion_avant_migration'));
+ $('cloudConflictsBtn').addEventListener('click',()=>exportSaved('mailotion-conflicts-v1','Mailotion_conflits'));
  $('cloudConfigBtn').addEventListener('click',()=>{$('cloudSettings').hidden=!$('cloudSettings').hidden});
  document.addEventListener('visibilitychange',()=>{
    if(document.visibilityState==='visible'&&state.connected&&tokenReady()&&!state.busy){clearTimeout(actionTimer);actionTimer=setTimeout(()=>syncCloud(),700)}
