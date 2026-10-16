@@ -373,6 +373,35 @@ function exportSaved(key,name){
  api().toast('Copie de sécurité exportée en JSON.');
  }catch(e){api().toast('Impossible de récupérer cette sauvegarde.')}
 }
+
+/* Prospection individualisée : l'ouverture du composeur ne prouve PAS l'envoi.
+   Cette méthode est appelée uniquement après confirmation explicite de l'utilisateur. */
+function recordOutreachSent(prospectId,recipient,subject,body,makeFollowup=false){
+ const lead=getProspect(prospectId),addr=val(recipient,240),now=new Date().toISOString();
+ if(!lead)return {ok:false,error:'Boutique introuvable.'};
+ if(!addr||lead.email?.trim().toLowerCase()!==addr.toLowerCase())return {ok:false,error:'Adresse différente de la fiche. Vérifie-la avant envoi.'};
+ if(lead.emailStatus==='invalide'||state.emails.some(x=>x.prospectId===prospectId&&x.email?.toLowerCase()===addr.toLowerCase()&&x.status==='invalide'))
+  return {ok:false,error:'Adresse signalée invalide : envoi désactivé.'};
+ if(state.actions.some(x=>x.prospectId===prospectId&&x.type==='email_envoye'&&x.status==='terminee'))
+  return {ok:false,error:'Cette boutique possède déjà un email envoyé dans son historique. Vérifie avant d’en envoyer un deuxième.'};
+ const stamp=date(),text='Premier email de prospection Mailotion envoyé à '+addr+'\nObjet : '+val(subject,230)+'\n\n'+val(body,1700);
+ const action={id:uid('action'),prospectId,date:stamp,due:'',type:'email_envoye',status:'terminee',description:text,next:'',createdAt:now,updatedAt:now};
+ state.actions.push(action);
+ if(!lead.stage||lead.stage==='a_contacter')lead.stage='contactee';
+ lead.lastContact=stamp;
+ lead.lastAction='Premier email Mailotion envoyé à '+addr;
+ lead.updatedAt=now;
+ if(makeFollowup){
+  const next=new Date();next.setHours(12,0,0,0);next.setDate(next.getDate()+5);
+  const iso=next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0')+'-'+String(next.getDate()).padStart(2,'0');
+  if(!lead.followup)lead.followup=iso;
+  if(!lead.nextAction)lead.nextAction='Relancer après le premier email de prospection';
+  state.actions.push({id:uid('action'),prospectId,date:stamp,due:iso,type:'relance',status:'a_faire',
+   description:'Relancer '+lead.name+' après le premier email Mailotion',next:'',createdAt:now,updatedAt:now});
+ }
+ saveLocal();api().persist();api().render();renderToday();scheduleCloud();
+ return {ok:true,actionId:action.id};
+}
 function addUIEvents(){
  $('backupBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();exportAll()},true);
  $('restoreInput').addEventListener('change',async e=>{e.stopImmediatePropagation();if(e.target.files?.[0])await restoreAll(e.target.files[0]);e.target.value=''},true);
@@ -418,7 +447,7 @@ function init(){
  snapshot();addUIEvents();renderToday();
  if(state.client&&state.sheet)showCloud('Connexion privée configurée, appuie sur « Connecter Google » pour synchroniser.');
  else showCloud('Non connectée. Tes fiches actuelles restent sur ce téléphone, sans suppression.');
- window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails)};
+ window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails),recordOutreachSent};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
