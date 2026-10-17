@@ -2,7 +2,10 @@
 'use strict';
 // Un email à la fois. Aucun envoi automatique.
 const STORAGE='mailotion-outreach-template-v1';
-const DEFAULT_BODY="Je développe actuellement MAILOTION et je cherche\nquelques boutiques en ligne pour tester gratuitement\nmon travail.\n\nMon idée est simple : vous aider à récupérer davantage\nde ventes grâce aux paniers abandonnés et à donner\nenvie à vos clients de revenir acheter, avec des emails\nmieux pensés et adaptés à votre univers.\n\nMême si vous avez déjà des emails automatiques,\nil y a peut-être des choses à améliorer.\n\nJe vous propose de m'en occuper gratuitement,\nsans engagement. En échange, j'aimerais simplement\navoir votre avis sur le résultat.\n\nEst-ce que ça pourrait vous intéresser ?\n\nBonne journée,\nLudovic — MAILOTION";
+const LEGACY_BODY="Je développe actuellement MAILOTION et je cherche\nquelques boutiques en ligne pour tester gratuitement\nmon travail.\n\nMon idée est simple : vous aider à récupérer davantage\nde ventes grâce aux paniers abandonnés et à donner\nenvie à vos clients de revenir acheter, avec des emails\nmieux pensés et adaptés à votre univers.\n\nMême si vous avez déjà des emails automatiques,\nil y a peut-être des choses à améliorer.\n\nJe vous propose de m'en occuper gratuitement,\nsans engagement. En échange, j'aimerais simplement\navoir votre avis sur le résultat.\n\nEst-ce que ça pourrait vous intéresser ?\n\nBonne journée,\nLudovic — MAILOTION";
+const DEFAULT_BODY="Je lance MAILOTION et je sélectionne trois boutiques en ligne pour un programme pilote gratuit.\n\nJe commence par regarder les emails déjà en place, puis je prépare une seule automatisation adaptée (bienvenue, panier abandonné ou après-achat), avec 2 à 3 emails. Je la configure et la teste, puis je propose un premier bilan après 10 à 14 jours et un petit ajustement si nécessaire.\n\nIl n'y a aucun paiement ni engagement. En échange, j'aimerais simplement un retour franc sur le travail réalisé. Je choisis les trois boutiques selon leurs besoins et la compatibilité de leurs outils.\n\nBonne journée,\nLudovic — MAILOTION";
+const PILOT_URL="https://www.ludovicdulac.com/7841a0d7";
+const PILOT_INVITATION="Pour proposer votre boutique au programme pilote gratuit :\\nhttps://www.ludovicdulac.com/7841a0d7\\n\\nSi vous préférez, vous pouvez aussi simplement répondre à cet email. Je vous répondrai personnellement.";
 const $=id=>document.getElementById(id);
 const crm=()=>window.MailotionCRM;
 const cloud=()=>window.MailotionCloud;
@@ -53,11 +56,13 @@ function composeMessage(){
  const salutation=$('outreachGreeting').value.trim();
  const common=$('outreachBody').value.trim();
  const personal=$('outreachPersonal').value.trim();
- // Insérer les questions AVANT la signature, jamais après le nom du commercial.
+ // Préserver les deux questions personnalisées avant le lien et la signature.
+ // Ajouter le lien à tous les brouillons, même si le modèle local a été modifié.
+ const invitation=(common+'\n'+personal).includes(PILOT_URL)?'':PILOT_INVITATION;
  const match=common.match(/\n\s*(Bonne journée,\s*\nLudovic\s*[—-]\s*MAILOTION\s*)$/i);
- if(!match)return [salutation,common,personal].filter(Boolean).join('\n\n');
+ if(!match)return [salutation,common,personal,invitation].filter(Boolean).join('\n\n');
  const text=common.slice(0,match.index).trim();
- return [salutation,text,personal,match[1].trim()].filter(Boolean).join('\n\n');
+ return [salutation,text,personal,invitation,match[1].trim()].filter(Boolean).join('\n\n');
 }
 function updateResearch(p){
  const filled=!!p?.outreachPersonal?.trim();
@@ -134,7 +139,13 @@ function skip(){
 function init(){
  if(state.ready)return;if(!crm()||!cloud()){setTimeout(init,100);return}
  state.ready=true;
- try{const saved=localStorage.getItem(STORAGE),previous=DEFAULT_BODY.replace('quelques boutiques en ligne','quelques boutiques Shopify');$('outreachBody').value=saved===previous?DEFAULT_BODY:(saved??DEFAULT_BODY)}catch{$('outreachBody').value=DEFAULT_BODY}
+ try{
+  const saved=localStorage.getItem(STORAGE);
+  const olderShopify=LEGACY_BODY.replace('quelques boutiques en ligne','quelques boutiques Shopify');
+  const upgrade=saved===LEGACY_BODY||saved===olderShopify;
+  $('outreachBody').value=(saved===null||upgrade)?DEFAULT_BODY:saved;
+  if(upgrade)localStorage.setItem(STORAGE,DEFAULT_BODY);
+ }catch{$('outreachBody').value=DEFAULT_BODY}
  $('outreachLead').addEventListener('change',e=>setLead(e.target.value));
  $('outreachSkip').addEventListener('click',skip);
  $('outreachBody').addEventListener('input',()=>{saveText();renderPreview()});
