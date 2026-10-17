@@ -37,9 +37,8 @@ function stageFor(s){let value=norm(s).replaceAll(' ','_');const a={
  return a[value]||'a_contacter';
 }
 function webUrl(s){const raw=txt(s,500);if(!raw)return '';try{const url=new URL(/^https?:\/\//i.test(raw)?raw:'https://'+raw);return /^https?:$/.test(url.protocol)?url.href:''}catch{return ''}}
-function emailUrl(s,shop){const e=txt(s,240);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return '';const subj='Une idée pour vos emails — Mailotion';const body='Bonjour,\n\nJe découvre votre boutique '+shop+' et j’aimerais vous proposer un premier regard gratuit, sans engagement, sur les emails envoyés à vos clients (bienvenue, panier abandonné, après-achat).\n\nSeriez-vous disponible pour en parler ?\n\nBelle journée,\nMailotion';
- return 'mailto:'+encodeURIComponent(e)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
-}
+// Le raccourci « Écrire » pour les échanges existants n'utilise jamais de pitch commercial.
+function emailUrl(s){const e=txt(s,240);return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)?'mailto:'+encodeURIComponent(e):'';}
 function phoneUrl(s){const p=txt(s,50).replace(/[^0-9+]/g,'');return p.replace(/\D/g,'').length>=5?'tel:'+p:''}
 function sanitize(raw,source='local'){
  if(!raw || typeof raw!=='object'||Array.isArray(raw))return null;
@@ -146,7 +145,9 @@ function render(){
  }
 }
 function cardHtml(r){
- const site=webUrl(r.website), mail=r.emailStatus==='invalide'?'':emailUrl(r.email,r.name),phone=phoneUrl(r.phone);
+ const site=webUrl(r.website), mail=r.emailStatus==='invalide'?'':emailUrl(r.email),phone=phoneUrl(r.phone);
+ const forOutreach=!!mail&&r.stage==='a_contacter'&&!r.lastContact&&!r.clientAcquired;
+ const writeButton=forOutreach?'<a class="action primary" href="#outreachPanel" data-action="outreach" data-id="'+esc(r.id)+'">✉ Préparer l’email</a>':link(mail,'✉ Écrire','primary');
  const citySector=[r.city,r.sector].filter(Boolean).join(' · ')||'Boutique e-commerce';
  const initial=txt(r.name).split(/\s+/).slice(0,2).map(s=>s.slice(0,1)).join('').toUpperCase();
  const relance=r.followup?'<span class="deadline '+(isFollowup(r)?'overdue':'')+'">⏰ '+(isFollowup(r)?'À relancer':'Relance')+' : '+esc(displayDate(r.followup))+'</span>':'';
@@ -159,7 +160,7 @@ function cardHtml(r){
  '<div class="tags"><span class="status s-'+esc(r.stage)+'">'+esc(LABEL[r.stage]||'À contacter')+'</span>'+relance+'</div>'+
  '<div class="contact-strip">'+(quickInfo||'<span class="contact-mini">Coordonnées à compléter</span>')+'</div>'+
  (r.notes?'<p class="lead-note">'+esc(r.notes.slice(0,150))+(r.notes.length>150?'…':'')+'</p>':'')+
- '<div class="card-actions">'+link(mail,'✉ Écrire','primary')+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
+ '<div class="card-actions">'+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
 }
 function displayDate(s){const p=isoDate(s).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s}
 function filterTo(k){state.filter=k;render();document.querySelector('.board').scrollIntoView({behavior:'smooth',block:'start'})}
@@ -270,7 +271,14 @@ function install(){
  for(const b of document.querySelectorAll('[data-stage]'))b.addEventListener('click',()=>filterTo(b.dataset.stage));
  for(const b of document.querySelectorAll('[data-summary]'))b.addEventListener('click',()=>filterTo({todo:'a_contacter',free:'gratuit',clients:'cliente'}[b.dataset.summary]||'all'));
  for(const id of ['addTop','emptyAdd'])$(id).addEventListener('click',()=>edit(null));
- $('cards').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;if(b.dataset.action==='edit')edit(b.dataset.id)});
+ $('cards').addEventListener('click',e=>{
+  const b=e.target.closest('[data-action]');if(!b)return;
+  if(b.dataset.action==='edit'){edit(b.dataset.id);return}
+  if(b.dataset.action==='outreach'){
+   e.preventDefault();
+   if(!window.MailotionOutreach?.select(b.dataset.id))toast('Ce contact n’est pas dans la file de prospection. Vérifie sa fiche et son historique.');
+  }
+ });
  $('leadForm').addEventListener('submit',handleForm);$('deleteBtn').addEventListener('click',deleteLead);
  for(const b of document.querySelectorAll('[data-close]'))b.addEventListener('click',()=>closeDialog($(b.dataset.close)));
  for(const dlg of document.querySelectorAll('dialog')){dlg.addEventListener('close',()=>document.body.style.overflow='');dlg.addEventListener('click',e=>{if(e.target===dlg)closeDialog(dlg)})}
