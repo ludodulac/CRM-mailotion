@@ -147,12 +147,13 @@ function render(){
 function cardHtml(r){
  const site=webUrl(r.website), mail=r.emailStatus==='invalide'?'':emailUrl(r.email),phone=phoneUrl(r.phone);
  const forOutreach=!!mail&&r.stage==='a_contacter'&&!r.lastContact&&!r.clientAcquired;
- const writeButton=forOutreach?'<a class="action primary" href="#outreachPanel" data-action="outreach" data-id="'+esc(r.id)+'">✉ Préparer l’email</a>':link(mail,'✉ Écrire','primary');
+
  const citySector=[r.city,r.sector].filter(Boolean).join(' · ')||'Boutique e-commerce';
  const initial=txt(r.name).split(/\s+/).slice(0,2).map(s=>s.slice(0,1)).join('').toUpperCase();
  const relance=r.followup?'<span class="deadline '+(isFollowup(r)?'overdue':'')+'">⏰ '+(isFollowup(r)?'À relancer':'Relance')+' : '+esc(displayDate(r.followup))+'</span>':'';
  const quickInfo=[r.email?'<span class="contact-mini">✉ '+esc(r.email)+(r.emailStatus==='invalide'?' · invalide':r.emailStatus==='alternatif_a_tester'?' · à tester':'')+'</span>':'',r.phone?'<span class="contact-mini">☎ '+esc(r.phone)+'</span>':''].filter(Boolean).join('');
  const link=(href,label,style)=>href?'<a class="action '+(style||'')+'" href="'+esc(href)+'" '+(href.startsWith('http')?'target="_blank" rel="noopener noreferrer"':'')+'>'+label+'</a>':'<span class="action disabled" aria-disabled="true">'+label+'</span>';
+ const writeButton=forOutreach?'<a class="action primary" href="#outreachPanel" data-action="outreach" data-id="'+esc(r.id)+'">✉ Préparer l’email</a>':link(mail,'✉ Écrire','primary');
  return '<article class="lead-card" data-id="'+esc(r.id)+'">'+
  '<div class="card-head"><div class="avatar" aria-hidden="true">'+esc(initial)+'</div>'+
  '<div class="card-main"><h3 class="lead-name">'+esc(r.name)+'</h3><p class="lead-meta">'+esc(citySector)+'</p></div>'+
