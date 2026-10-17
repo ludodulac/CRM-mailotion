@@ -68,6 +68,7 @@ function sanitize(raw,source='local'){
  lastAction:txt(raw.lastAction||'',1000), nextAction:txt(raw.nextAction||'',1200),
  proposalSent:raw.proposalSent===true,freeInProgress:raw.freeInProgress===true,
  paidOffer:txt(raw.paidOffer||'',300),clientAcquired:raw.clientAcquired===true,archived:raw.archived===true,
+ outreachDraftSubject:txt(raw.outreachDraftSubject||'',200),outreachDraftBody:txt(raw.outreachDraftBody||'',4800),
  outreachPersonal:txt(raw.outreachPersonal||'',1800),outreachResearch:txt(raw.outreachResearch||'',1000),
  outreachSource:txt(raw.outreachSource||'',550),outreachReviewedAt:isoDate(raw.outreachReviewedAt),
  origin:source==='github'?'github':'local',
