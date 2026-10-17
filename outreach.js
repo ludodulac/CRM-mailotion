@@ -3,9 +3,10 @@
 // Un email à la fois. Aucun envoi automatique.
 const STORAGE='mailotion-outreach-template-v1';
 const LEGACY_BODY="Je développe actuellement MAILOTION et je cherche\nquelques boutiques en ligne pour tester gratuitement\nmon travail.\n\nMon idée est simple : vous aider à récupérer davantage\nde ventes grâce aux paniers abandonnés et à donner\nenvie à vos clients de revenir acheter, avec des emails\nmieux pensés et adaptés à votre univers.\n\nMême si vous avez déjà des emails automatiques,\nil y a peut-être des choses à améliorer.\n\nJe vous propose de m'en occuper gratuitement,\nsans engagement. En échange, j'aimerais simplement\navoir votre avis sur le résultat.\n\nEst-ce que ça pourrait vous intéresser ?\n\nBonne journée,\nLudovic — MAILOTION";
-const DEFAULT_BODY="Je lance MAILOTION et je sélectionne trois boutiques en ligne pour un programme pilote gratuit.\n\nJe commence par regarder les emails déjà en place, puis je prépare une seule automatisation adaptée (bienvenue, panier abandonné ou après-achat), avec 2 à 3 emails. Je la configure et la teste, puis je propose un premier bilan après 10 à 14 jours et un petit ajustement si nécessaire.\n\nIl n'y a aucun paiement ni engagement. En échange, j'aimerais simplement un retour franc sur le travail réalisé. Je choisis les trois boutiques selon leurs besoins et la compatibilité de leurs outils.\n\nBonne journée,\nLudovic — MAILOTION";
+const PREVIOUS_PILOT_BODY="Je lance MAILOTION et je sélectionne trois boutiques en ligne pour un programme pilote gratuit.\n\nJe commence par regarder les emails déjà en place, puis je prépare une seule automatisation adaptée (bienvenue, panier abandonné ou après-achat), avec 2 à 3 emails. Je la configure et la teste, puis je propose un premier bilan après 10 à 14 jours et un petit ajustement si nécessaire.\n\nIl n'y a aucun paiement ni engagement. En échange, j'aimerais simplement un retour franc sur le travail réalisé. Je choisis les trois boutiques selon leurs besoins et la compatibilité de leurs outils.\n\nBonne journée,\nLudovic — MAILOTION";
+const DEFAULT_BODY="Je lance MAILOTION et, pour commencer, je cherche trois boutiques en ligne avec lesquelles travailler gratuitement. J'ai pris le temps de regarder votre boutique et j'ai eu envie de vous écrire.\n\nL'idée est toute simple : regarder ce que vous avez déjà mis en place, puis créer et installer une seule petite séquence automatique de 2 ou 3 emails (bienvenue, panier abandonné ou après-achat). Rien ne part à vos clients sans votre accord. On fait ensuite un premier point après 10 à 14 jours et un petit ajustement si besoin.\n\nC'est entièrement gratuit pour mon travail, sans abonnement à MAILOTION et sans engagement. En échange, j'aimerais juste avoir votre avis sincère.\n\nBonne journée,\nLudovic — MAILOTION";
 const PILOT_URL="https://www.ludovicdulac.com/7841a0d7";
-const PILOT_INVITATION="Pour proposer votre boutique au programme pilote gratuit :\nhttps://www.ludovicdulac.com/7841a0d7\n\nSi vous préférez, vous pouvez aussi simplement répondre à cet email. Je vous répondrai personnellement.";
+const PILOT_INVITATION="Vous pouvez tout simplement me répondre ici si cela vous intéresse. J'ai aussi prévu un petit formulaire si vous préférez :\nhttps://www.ludovicdulac.com/7841a0d7";
 const $=id=>document.getElementById(id);
 const crm=()=>window.MailotionCRM;
 const cloud=()=>window.MailotionCloud;
@@ -28,7 +29,7 @@ function setLead(id){
  const p=(crm()?.state.records||[]).find(x=>x.id===id);
  state.current=p?.id||'';state.opened='';state.openedMessage='';state.openedSubject='';
  $('outreachGreeting').value=p?greeting(p):'';
- $('outreachSubject').value=p?'Une petite proposition pour '+p.name:'';
+ $('outreachSubject').value=p?'Une proposition un peu particulière pour '+p.name:'';
  $('outreachPersonal').value=p?.outreachPersonal||'';
  $('outreachLead').value=state.current;
  for(const n of ['outreachGreeting','outreachSubject','outreachBody','outreachFollowup','outreachPersonal'])$(n).disabled=!p;
@@ -142,7 +143,7 @@ function init(){
  try{
   const saved=localStorage.getItem(STORAGE);
   const olderShopify=LEGACY_BODY.replace('quelques boutiques en ligne','quelques boutiques Shopify');
-  const upgrade=saved===LEGACY_BODY||saved===olderShopify;
+  const upgrade=saved===LEGACY_BODY||saved===olderShopify||saved===PREVIOUS_PILOT_BODY;
   $('outreachBody').value=(saved===null||upgrade)?DEFAULT_BODY:saved;
   if(upgrade)localStorage.setItem(STORAGE,DEFAULT_BODY);
  }catch{$('outreachBody').value=DEFAULT_BODY}
@@ -160,5 +161,16 @@ function init(){
  $('cloudConnect').addEventListener('click',()=>setTimeout(refresh,2500));
  refresh();
 }
+// Le raccourci des fiches doit ouvrir cet atelier, pas un ancien email générique.
+window.MailotionOutreach={
+ select(id){
+  if(!state.ready)return false;
+  state.skipped.delete(id);
+  if(!queue().some(p=>p.id===id))return false;
+  refresh();setLead(id);
+  $('outreachPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  return true;
+ }
+};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
