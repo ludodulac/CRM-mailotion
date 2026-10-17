@@ -44,17 +44,10 @@
      <button class="button button-secondary" type="button" id="outreachSkip">→ Passer à la boutique suivante</button>
     </div>
     <div class="outreach-editor">
-     <div class="field"><label for="outreachGreeting">Formule d'accueil <small>(modifiable)</small></label><input id="outreachGreeting" maxlength="190" placeholder="Bonjour à l'équipe de cette boutique,"></div>
-     <div class="field"><label for="outreachSubject">Objet de l'email</label><input id="outreachSubject" maxlength="200" placeholder="Une proposition un peu particulière pour cette boutique"></div>
-     <div class="field"><label for="outreachBody">Message commun <small>(personnalisable et mémorisé sur ce téléphone)</small></label><textarea id="outreachBody" rows="14" maxlength="4000" spellcheck="true"></textarea></div>
-     <div class="outreach-editor-foot"><span id="outreachSaved">✓ Modèle enregistré</span><button id="outreachReset" type="button">Réinitialiser le texte</button></div>
-     <div class="outreach-research">
-      <div class="outreach-research-head"><div><b>✦ Personnalisation de cette boutique</b><small>Observation réelle + 2 questions sur les emails</small></div><span id="outreachResearchBadge" class="outreach-research-badge">Recherche à synchroniser</span></div>
-      <p id="outreachResearchNote" class="outreach-research-note">Pour chaque boutique, ChatGPT analyse son site avant de préparer les questions.</p>
-      <div class="field"><label for="outreachPersonal">Paragraphe à ajouter avant la signature <small>(modifiable)</small></label><textarea id="outreachPersonal" rows="6" maxlength="1800" placeholder="D'ailleurs, j'ai vu que… Est-ce que… ? Et… ?" spellcheck="true"></textarea></div>
-      <a href="#" id="outreachSource" target="_blank" rel="noopener noreferrer" hidden>↗ Voir la page analysée</a>
-      <p class="outreach-research-help">Les questions portent sur les possibilités d'amélioration, pas sur des dysfonctionnements supposés. Tu peux changer ce paragraphe avant chaque envoi.</p>
-     </div>
+     <div class="field"><label for="outreachSubject">Objet de l'email</label><input id="outreachSubject" maxlength="200" placeholder="Écris ici l'objet pour cette boutique"></div>
+     <div class="field"><label for="outreachBody">Email complet <small>(modifiable directement)</small></label><textarea id="outreachBody" rows="18" maxlength="4800" spellcheck="true" placeholder="Le mail préparé pour cette boutique s'affiche ici. Tu peux le remplacer entièrement ou en modifier une phrase."></textarea></div>
+     <div class="outreach-editor-foot"><span id="outreachSaved">Prêt à être vérifié</span></div>
+    </div>
     </div>
    </div>
    <div class="outreach-right">
