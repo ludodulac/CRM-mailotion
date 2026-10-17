@@ -10,6 +10,62 @@ const PILOT_INVITATION="Vous pouvez tout simplement me répondre ici si cela vou
 const $=id=>document.getElementById(id);
 const crm=()=>window.MailotionCRM;
 const cloud=()=>window.MailotionCloud;
+
+/*
+ * Repli hors connexion basé UNIQUEMENT sur des informations publiques des sites.
+ * Aucune adresse email, fiche, note privée ni donnée Google Sheets publiée ici.
+ * Si une vraie personnalisation du CRM privé est disponible, elle est prioritaire.
+ */
+const PUBLIC_SITE_QUESTIONS={
+ 'echlo-cosmetique.fr': {
+  text:"D'ailleurs, en regardant votre site, j'ai découvert votre coffret découverte et vos soins botaniques. Est-ce que vous expliquez déjà par email comment associer les différents produits ? Et après un premier achat, proposez-vous une routine complémentaire ?",
+  source:"https://echlo-cosmetique.fr/produit/coffret-decouverte/"
+ },
+ 'sous-l-ecorce.fr': {
+  text:"D'ailleurs, j'ai vu vos coffrets bien-être et le rituel visage qui associe plusieurs soins. Est-ce que vous envoyez déjà des conseils d'utilisation après l'achat d'un coffret ? Et lorsqu'une personne hésite et laisse sa commande en cours, reçoit-elle un rappel adapté ?",
+  source:"https://www.sous-l-ecorce.fr/categorie-produit/coffrets-bien-etre/"
+ },
+ 'cledeschamps.eu': {
+  text:"D'ailleurs, en parcourant votre site, j'ai aimé votre façon de décliner les soins selon les saisons, avec notamment la crème à la châtaigne et le sérum d'automne. Est-ce que vous accompagnez déjà vos clientes par email quand elles passent d'une saison à l'autre ? Et avez-vous un message prévu pour celles qui hésitent avant de terminer leur commande ?",
+  source:"https://www.cledeschamps.eu/automne/"
+ },
+ 'symphytum.fr': {
+  text:"D'ailleurs, j'ai découvert votre routine « Peau Délicate » et votre travail autour de la consoude. Est-ce que vous envoyez déjà des conseils pour utiliser les soins d'une routine après l'achat ? Et lorsqu'une personne hésite avant de commander, l'aidez-vous par email à choisir ?",
+  source:"https://symphytum.fr/produit/routine-peau-delicate/"
+ },
+ 'fleursdecafe.fr': {
+  text:"D'ailleurs, en regardant votre site, j'ai découvert vos soins à base de café revalorisé, notamment le gommage et la crème. Est-ce que vous présentez déjà par email comment les associer dans une routine ? Et avez-vous prévu une relance pour les personnes qui ne terminent pas leur panier ?",
+  source:"https://fleursdecafe.fr/"
+ },
+ 'kaleparis.com': {
+  text:"D'ailleurs, j'ai vu sur votre boutique la Base Nacrée et le Sérum Hydratant & Régénérant. Est-ce que vous expliquez déjà par email comment utiliser ces produits dans une routine ? Et avez-vous prévu un rappel pour les visiteurs qui hésitent à commander ?",
+  source:"https://www.kaleparis.com/boutique"
+ },
+ 'nansca.com': {
+  text:"D'ailleurs, j'ai découvert votre laboratoire familial et la variété de vos soins, notamment vos crèmes et vos élixirs. Est-ce que vous aidez déjà chaque client à choisir sa routine par email ? Et après un premier achat, proposez-vous des soins complémentaires adaptés ?",
+  source:"https://nansca.com/"
+ },
+ 'la-canopee.com': {
+  text:"D'ailleurs, j'ai remarqué que vous proposez déjà une newsletter, un programme de fidélité et plusieurs routines de soins. Est-ce que vos emails après-achat conseillent une suite différente selon le produit acheté ? Et avez-vous testé plusieurs types de rappels de panier selon les gammes ?",
+  source:"https://www.la-canopee.com/"
+ },
+ 'odenya.fr': {
+  text:"D'ailleurs, j'ai vu votre diagnostic de peau et vos différentes gammes de soins. Est-ce que les personnes qui font ce diagnostic reçoivent déjà des conseils adaptés par email ? Et lorsqu'elles hésitent sur un pack, avez-vous un message de relance qui reprend les soins regardés ?",
+  source:"https://odenya.fr/"
+ },
+ 'caliece.fr': {
+  text:"D'ailleurs, j'ai remarqué vos deux espaces de vente, l'un pour les particuliers et l'autre pour les professionnels. Est-ce que vos emails de bienvenue sont déjà différents selon ces publics ? Et avez-vous prévu un rappel de panier adapté aux particuliers ?",
+  source:"https://caliece.fr/"
+ }
+};
+function publicSiteData(p){
+ try{
+  const u=new URL(p?.website||'');const host=u.hostname.toLowerCase().replace(/^www\./,'');
+  return PUBLIC_SITE_QUESTIONS[host]||null;
+ }catch{return null}
+}
+function personalText(p){return (p?.outreachPersonal||'').trim()||publicSiteData(p)?.text||''}
+
 const state={current:'',opened:'',openedMessage:'',openedSubject:'',skipped:new Set(),signature:'',ready:false};
 let personalTimer;
 function validEmail(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s||'').trim())}
@@ -30,7 +86,7 @@ function setLead(id){
  state.current=p?.id||'';state.opened='';state.openedMessage='';state.openedSubject='';
  $('outreachGreeting').value=p?greeting(p):'';
  $('outreachSubject').value=p?'Une proposition un peu particulière pour '+p.name:'';
- $('outreachPersonal').value=p?.outreachPersonal||'';
+ $('outreachPersonal').value=p?personalText(p):'';
  $('outreachLead').value=state.current;
  for(const n of ['outreachGreeting','outreachSubject','outreachBody','outreachFollowup','outreachPersonal'])$(n).disabled=!p;
  renderPreview();
@@ -48,7 +104,7 @@ function refresh(){
  $('outreachSkip').disabled=!q.length;
  if(q.some(p=>p.id===state.current)){
   $('outreachLead').value=state.current;
-  const p=current();if(document.activeElement!==$('outreachPersonal')&&$('outreachPersonal').value!==(p.outreachPersonal||''))$('outreachPersonal').value=p.outreachPersonal||'';
+  const p=current();if(document.activeElement!==$('outreachPersonal')&&$('outreachPersonal').value!==personalText(p))$('outreachPersonal').value=personalText(p);
   renderPreview()
  }
  else setLead(q[0]?.id||'');
@@ -66,12 +122,16 @@ function composeMessage(){
  return [salutation,text,personal,invitation,match[1].trim()].filter(Boolean).join('\n\n');
 }
 function updateResearch(p){
- const filled=!!p?.outreachPersonal?.trim();
- $('outreachResearchBadge').textContent=filled?(p.outreachReviewedAt?'Analysé le '+p.outreachReviewedAt.split('-').reverse().join('/'):'Texte personnalisé'):'À analyser';
+ const fromPrivate=!!p?.outreachPersonal?.trim();
+ const backup=!fromPrivate?publicSiteData(p):null;
+ const filled=!!personalText(p);
+ $('outreachResearchBadge').textContent=fromPrivate?(p.outreachReviewedAt?'Analysé le '+p.outreachReviewedAt.split('-').reverse().join('/'):'Questions enregistrées'):backup?'Questions préparées':'À analyser';
  $('outreachResearchBadge').classList.toggle('ready',filled);
- $('outreachResearchNote').textContent=p?.outreachResearch||'Aucune analyse enregistrée. Demande à ChatGPT d’étudier la boutique puis de synchroniser le CRM.';
+ $('outreachResearchNote').textContent=fromPrivate?(p.outreachResearch||'Questions personnalisées enregistrées dans ton CRM.'):(backup?'Questions préparées à partir d’éléments publics du site. Tu peux les vérifier avant d’envoyer.':'Aucune question prête pour cette boutique. Il faut analyser son site avant l’envoi.');
+ const live=document.querySelector('.outreach-live');
+ if(live)live.textContent=filled?'● QUESTIONS PRÉPARÉES':'○ À PERSONNALISER';
  let link='';
- try{const u=new URL(p?.outreachSource||'');if(u.protocol==='https:'||u.protocol==='http:')link=u.href}catch{}
+ try{const u=new URL(p?.outreachSource||backup?.source||'');if(u.protocol==='https:'||u.protocol==='http:')link=u.href}catch{}
  $('outreachSource').hidden=!link;if(link)$('outreachSource').href=link;
 }
 function savePersonal(){
@@ -97,7 +157,7 @@ function renderPreview(){
    p.emailStatus!=='confirme'?'Adresse email non confirmée : vérifie-la avant envoi.':'';
   if(!cloud().status().connected)warning+=(warning?' ':'')+'Google non connecté : l’historique sera d’abord enregistré sur ton téléphone.';
  }
- if(valid&&!$('outreachPersonal').value.trim())warning+=(warning?' ':'')+'Personnalisation absente : connecte Google pour recevoir les questions issues de l’analyse du site.';
+ if(valid&&!$('outreachPersonal').value.trim())warning+=(warning?' ':'')+'Personnalisation absente : questions à préparer avant l’envoi.';
   $('outreachWarning').hidden=!warning;$('outreachWarning').textContent=warning;
  updateResearch(p);
  const ready=valid&&!!$('outreachGreeting').value.trim()&&!!$('outreachSubject').value.trim()&&!!$('outreachBody').value.trim()&&!!$('outreachPersonal').value.trim();
