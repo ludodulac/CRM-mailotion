@@ -64,7 +64,13 @@ function formFor(p){
  const status=url?(p?.contactFormStatus==='confirmed'?'confirmed':'page_only'):'absent';
  return {url,status};
 }
-function formMessage(value){return String(value||'').replace('répondez-moi simplement ici','contactez-moi par email à ludodulac@gmail.com')}
+function formMessage(value){
+ let result=String(value||'').trim();
+ if(!result)return '';
+ result=result.replaceAll('répondez-moi simplement ici','écrivez-moi à ludodulac@gmail.com').replaceAll('répondez-moi ici','écrivez-moi à ludodulac@gmail.com');
+ if(!result.includes('ludodulac@gmail.com'))result+='\n\nPour me contacter : ludodulac@gmail.com';
+ return result;
+}
 async function copyToClipboard(value){
  const valueToCopy=String(value||'').trim();
  if(!valueToCopy){toast('Aucun email rédigé pour cette boutique.');return false}
@@ -313,7 +319,7 @@ async function importHash(){
  }catch(e){toast("Impossible d'importer ce lien.");}
 }
 function install(){
- fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId,formFor,copyToClipboard};
+ fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId,formFor,copyToClipboard,formMessage};
  $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
  for(const b of document.querySelectorAll('[data-stage]'))b.addEventListener('click',()=>filterTo(b.dataset.stage));
  for(const b of document.querySelectorAll('[data-summary]'))b.addEventListener('click',()=>filterTo({todo:'a_contacter',free:'gratuit',clients:'cliente'}[b.dataset.summary]||'all'));
@@ -325,7 +331,7 @@ function install(){
    e.preventDefault();
    const p=state.records.find(x=>x.id===b.dataset.id);
    const draft=p?.outreachDraftBody||window.MailotionOutreach?.draftFor(p?.id)?.body||'';
-   void copyToClipboard(draft);
+   void copyToClipboard(formMessage(draft));
    return;
   }
   if(b.dataset.action==='outreach'){
