@@ -51,7 +51,15 @@ function validEmail(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s||'').tr
 function alreadySent(p){return (cloud()?.getActions()||[]).some(x=>x.prospectId===p.id&&x.type==='email_envoye'&&x.status==='terminee')}
 function isInvalid(p){return p.emailStatus==='invalide'||(cloud()?.getEmails()||[]).some(x=>x.prospectId===p.id&&x.email?.trim().toLowerCase()===p.email?.trim().toLowerCase()&&x.status==='invalide')}
 function eligible(p){return !!p&&!p.archived&&!p.clientAcquired&&['','a_contacter'].includes(p.stage||'')&&!p.lastContact&&!alreadySent(p)&&validEmail(p.email)&&!isInvalid(p)}
-function queue(){return (crm()?.state.records||[]).filter(p=>eligible(p)&&!state.skipped.has(p.id)).sort((a,b)=>({haute:0,moyenne:1,basse:2}[a.priority]??3)-({haute:0,moyenne:1,basse:2}[b.priority]??3)||a.name.localeCompare(b.name,'fr'))}
+// Les boutiques avec email invalide ou manquant peuvent passer par leur formulaire.
+function selectable(p){
+ if(!p||p.archived||p.clientAcquired||!['','a_contacter'].includes(p.stage||'')||state.skipped.has(p.id))return false;
+ if(eligible(p))return true;
+ if(p.emailStatus==='invalide')return true; // Adresse rejetée, proposer le formulaire, pas Gmail.
+ if(!p.lastContact&&!alreadySent(p)&&!validEmail(p.email))return true;
+ return false;
+}
+function queue(){return (crm()?.state.records||[]).filter(selectable).sort((a,b)=>({haute:0,moyenne:1,basse:2}[a.priority]??3)-({haute:0,moyenne:1,basse:2}[b.priority]??3)||a.name.localeCompare(b.name,'fr'))}
 function current(){return (crm()?.state.records||[]).find(p=>p.id===state.current)}
 function fallback(p){const m=String(p?.website||'').match(/^(?:https?:\/\/)?([^/:?#]+)/i);return m?PUBLIC_DRAFTS[m[1].toLowerCase().replace(/^www\./,'')]||null:null}
 function values(p){const d=fallback(p);return {subject:p?.outreachDraftSubject||d?.subject||'',body:p?.outreachDraftBody||d?.body||''}}
@@ -84,18 +92,33 @@ function refresh(){
  renderPreview();
 }
 function renderPreview(){
- const p=current(),valid=eligible(p)&&!state.skipped.has(p.id);
+ const p=current(),valid=selectable(p),mailAllowed=valid&&eligible(p);
  const subject=$('outreachSubject').value.trim(),body=$('outreachBody').value.trim();
  $('outreachPreviewSubject').textContent=valid?subject:'Aucun mail à préparer';
- $('outreachPreviewTo').textContent=valid?'À : '+p.email:'Aucune boutique à contacter avec une adresse valide.';
+ $('outreachPreviewTo').textContent=valid?(mailAllowed?'À : '+p.email:'Contact par formulaire ou page de contact'):'Aucune boutique disponible.';
  $('outreachPreviewBody').textContent=valid?body:'';
- $('outreachRecipient').textContent=valid?'Destinataire : '+p.email:'Aucun prospect éligible.';
- const badge=document.querySelector('.outreach-live');if(badge)badge.textContent=body?'● MAIL COMPLET':'○ À RÉDIGER';
+ $('outreachRecipient').textContent=valid?(mailAllowed?'Destinataire : '+p.email:'Boutique : '+p.name+' · Contact web'):'Aucun prospect éligible.';
+ const badge=document.querySelector('.outreach-live');if(badge)badge.textContent=valid&&body?'● MAIL COMPLET':'○ À RÉDIGER';
  let warning='';
- if(valid){warning=p.emailStatus==='alternatif_a_tester'?'Adresse alternative à vérifier.':p.emailStatus!=='confirme'?'Adresse email non confirmée : vérifie-la avant envoi.':'';
- if(!cloud().status().connected)warning+=(warning?' ':'')+'Sans connexion Google : tes modifications restent sur ce téléphone jusqu’à synchronisation.';}
+ if(valid){
+  if(p.emailStatus==='invalide')warning='Email rejeté : ne pas réenvoyer à '+p.email+'. Utilise plutôt le formulaire.';
+  else if(!validEmail(p.email))warning='Aucune adresse email : privilégie le formulaire de contact s’il existe.';
+  else if(p.emailStatus==='alternatif_a_tester')warning='Adresse alternative à vérifier avant envoi.';
+  else if(p.emailStatus!=='confirme')warning='Adresse email non confirmée : vérifie-la avant envoi.';
+  if(!cloud().status().connected)warning+=(warning?' ':'')+'Sans connexion Google : les modifications restent sur ce téléphone jusqu’à synchronisation.';
+ }
  $('outreachWarning').hidden=!warning;$('outreachWarning').textContent=warning;
- const ready=valid&&!!subject&&!!body,link=$('outreachCompose');
+ const route=valid?crm().formFor(p):{url:'',status:'absent'};
+ const copy=$('outreachCopy');copy.disabled=!(valid&&body);
+ const open=$('outreachFormOpen');
+ open.href=valid&&body&&route.url?route.url:'#';
+ open.textContent=route.status==='confirmed'?'↗ Ouvrir le formulaire':route.url?'↗ Ouvrir la page contact':'Formulaire non trouvé';
+ open.classList.toggle('disabled',!valid||!body||!route.url);
+ open.setAttribute('aria-disabled',valid&&body&&route.url?'false':'true');
+ $('outreachFormStatus').textContent=route.status==='confirmed'?'Copie le mail puis colle-le dans le formulaire (envoi manuel).'
+   :route.url?'Page de contact trouvée ; formulaire non confirmé. Vérifie avant de coller le message.'
+   :'Aucun formulaire de contact fiable trouvé pour ce site.';
+ const ready=mailAllowed&&!!subject&&!!body,link=$('outreachCompose');
  link.href=ready?'mailto:'+encodeURIComponent(p.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body):'#';
  link.setAttribute('aria-disabled',ready?'false':'true');link.classList.toggle('disabled',!ready);
  $('outreachConfirm').disabled=!(ready&&state.opened===p.id&&state.openedSubject===subject&&state.openedMessage===body);
@@ -130,12 +153,14 @@ function init(){
  $('outreachLead').addEventListener('change',e=>setLead(e.target.value));
  $('outreachSkip').addEventListener('click',skip);
  $('outreachSubject').addEventListener('input',saveDraft);$('outreachBody').addEventListener('input',saveDraft);
+ $('outreachCopy').addEventListener('click',()=>{if(selectable(current()))void crm().copyToClipboard($('outreachBody').value)});
+ $('outreachFormOpen').addEventListener('click',event=>{if(!selectable(current())||!$('outreachBody').value.trim()||!crm().formFor(current()).url)event.preventDefault()});
  $('outreachCompose').addEventListener('click',openDraft);$('outreachConfirm').addEventListener('click',confirmSent);
  window.addEventListener('mailotion:changed',()=>setTimeout(refresh,110));
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(refresh,110)});
  $('cloudConnect').addEventListener('click',()=>setTimeout(refresh,2500));
  refresh();
 }
-window.MailotionOutreach={select(id){if(!state.ready)return false;state.skipped.delete(id);if(!queue().some(p=>p.id===id))return false;refresh();setLead(id);$('outreachPanel').scrollIntoView({behavior:'smooth',block:'start'});return true}};
+window.MailotionOutreach={draftFor(id){const p=(crm()?.state.records||[]).find(x=>x.id===id);return p?values(p):null},select(id){if(!state.ready)return false;state.skipped.delete(id);if(!queue().some(p=>p.id===id))return false;refresh();setLead(id);$('outreachPanel').scrollIntoView({behavior:'smooth',block:'start'});return true}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
