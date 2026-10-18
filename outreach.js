@@ -118,6 +118,14 @@ function renderPreview(){
  $('outreachFormStatus').textContent=route.status==='confirmed'?'Le texte copié est adapté au formulaire et indique ton adresse email pour les réponses.'
    :route.url?'La copie ajoute ton adresse de réponse. Page de contact à vérifier avant l’envoi.'
    :'Aucun formulaire de contact fiable trouvé pour ce site.';
+ const nl=p?crm().newsletterFor(p):{url:'',status:'absent',location:''};
+ const nLink=$('outreachNewsletterOpen');
+ nLink.href=nl.url||'#';
+ nLink.textContent=nl.status==='found'?'✉ S’inscrire à la newsletter':nl.url?'🔎 Chercher la newsletter':'Newsletter non trouvée';
+ nLink.classList.toggle('disabled',!nl.url);
+ nLink.setAttribute('aria-disabled',nl.url?'false':'true');
+ $('outreachNewsletterStatus').textContent=nl.status==='found'?(nl.location+' Inscris-toi, puis partage-moi le message de bienvenue reçu.')
+  :nl.url?'Inscription non vérifiée : cherche-la sur le site, en particulier en bas de page.':'Aucune page à ouvrir pour cette boutique.';
  const ready=mailAllowed&&!!subject&&!!body,link=$('outreachCompose');
  link.href=ready?'mailto:'+encodeURIComponent(p.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body):'#';
  link.setAttribute('aria-disabled',ready?'false':'true');link.classList.toggle('disabled',!ready);
@@ -155,6 +163,7 @@ function init(){
  $('outreachSubject').addEventListener('input',saveDraft);$('outreachBody').addEventListener('input',saveDraft);
  $('outreachCopy').addEventListener('click',()=>{if(selectable(current()))void crm().copyToClipboard(crm().formMessage($('outreachBody').value))});
  $('outreachFormOpen').addEventListener('click',event=>{if(!selectable(current())||!$('outreachBody').value.trim()||!crm().formFor(current()).url)event.preventDefault()});
+ $('outreachNewsletterOpen').addEventListener('click',event=>{if(!$('outreachNewsletterOpen').href||$('outreachNewsletterOpen').getAttribute('aria-disabled')==='true')event.preventDefault()});
  $('outreachCompose').addEventListener('click',openDraft);$('outreachConfirm').addEventListener('click',confirmSent);
  window.addEventListener('mailotion:changed',()=>setTimeout(refresh,110));
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(refresh,110)});
