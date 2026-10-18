@@ -101,3 +101,12 @@ main.container{margin-top:-54px;position:relative}.stats{display:grid;grid-templ
 .outreach-newsletter .button.disabled{opacity:.45;pointer-events:none}
 .outreach-newsletter .outreach-form-help{margin:8px 0 0}
 .card-actions .newsletter-action{background:#f0faf4;color:#275f49;border-color:#cdebd7}
+
+/* Newsletter : suivi individuel et réversible par boutique. */
+.newsletter-card-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;padding:10px;background:#f5faf6;border:1px solid #e0eee4;border-radius:10px}
+.newsletter-card-row .action{flex:1 1 170px;max-width:100%;text-align:center}
+.newsletter-toggle{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;color:#3e604b;font-size:12px;font-weight:700;cursor:pointer}
+.newsletter-toggle input[type="checkbox"]{width:18px;height:18px;accent-color:#317e55;cursor:pointer;flex-shrink:0}
+.newsletter-toggle-atelier{margin:9px 0 2px}
+.newsletter-card-row .newsletter-action.disabled{background:#e6e8e7;color:#777d79;border-color:#d5d8d6;opacity:.85;cursor:not-allowed;pointer-events:none}
+.outreach-newsletter .button.disabled{background:#e6e8e7;color:#777d79;border-color:#d5d8d6;opacity:.85;cursor:not-allowed;pointer-events:none}
