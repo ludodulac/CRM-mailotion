@@ -1,4 +1,4 @@
-const CACHE='mailotion-crm-v7-mails-complets';
+const CACHE='mailotion-crm-v8-contact-formulaires';
 const CORE=['./','./index.html','./style.css','./app.js','./crm-cloud.js','./outreach.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./prospects.json'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
