@@ -64,6 +64,7 @@ function formFor(p){
  const status=url?(p?.contactFormStatus==='confirmed'?'confirmed':'page_only'):'absent';
  return {url,status};
 }
+function formMessage(value){return String(value||'').replace('répondez-moi simplement ici','contactez-moi par email à ludodulac@gmail.com')}
 async function copyToClipboard(value){
  const valueToCopy=String(value||'').trim();
  if(!valueToCopy){toast('Aucun email rédigé pour cette boutique.');return false}
