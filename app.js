@@ -242,7 +242,7 @@ function cardHtml(r){
  const formButton=form.url?link(form.url,form.status==='confirmed'?'↗ Formulaire de contact':'↗ Page contact','contact-form'):'<span class="action disabled" title="Aucun formulaire confirmé sur le site">Formulaire non trouvé</span>';
  const copyButton='<button type="button" class="action contact-copy" data-action="copy-contact-mail" data-id="'+esc(r.id)+'">📋 Copier le mail</button>';
  const newsletter=newsletterFor(r);
- const newsletterButton=r.newsletterSubscribed?'<span class="action disabled newsletter-action" aria-disabled="true">✓ Newsletter déjà suivie</span>':(newsletter.url?link(newsletter.url,newsletter.status==='found'?'✉ S’inscrire à la newsletter':'🔎 Chercher la newsletter','newsletter-action'):'<span class="action disabled" aria-disabled="true">Newsletter non trouvée</span>');
+ const newsletterButton=r.newsletterSubscribed?'<span class="action disabled newsletter-action" aria-disabled="true">✓ Newsletter déjà suivie</span>':(newsletter.url?link(newsletter.url,newsletter.status==='found'?'✉ S’inscrire à la newsletter':'🔎 Inscription non vérifiée','newsletter-action'):'<span class="action disabled" aria-disabled="true">Newsletter non trouvée</span>');
  const newsletterCheckbox='<label class="newsletter-toggle"><input type="checkbox" data-action="newsletter-toggle" data-id="'+esc(r.id)+'" '+(r.newsletterSubscribed?'checked ':'')+'> Déjà inscrit</label>';
  return '<article class="lead-card" data-id="'+esc(r.id)+'">'+
  '<div class="card-head"><div class="avatar" aria-hidden="true">'+esc(initial)+'</div>'+
