@@ -38,6 +38,47 @@ function stageFor(s){let value=norm(s).replaceAll(' ','_');const a={
 }
 function webUrl(s){const raw=txt(s,500);if(!raw)return '';try{const url=new URL(/^https?:\/\//i.test(raw)?raw:'https://'+raw);return /^https?:$/.test(url.protocol)?url.href:''}catch{return ''}}
 // Le raccourci « Écrire » pour les échanges existants n'utilise jamais de pitch commercial.
+// Pages publiques examinées le 18/10/2026 ; aucune coordonnée privée ici.
+const PUBLIC_FORMS={
+ 'echlo-cosmetique.fr':['https://echlo-cosmetique.fr/contact/','confirmed'],
+ 'sous-l-ecorce.fr':['https://www.sous-l-ecorce.fr/contact/','confirmed'],
+ 'cledeschamps.eu':['https://www.cledeschamps.eu/contact/','confirmed'],
+ 'symphytum.fr':['https://symphytum.fr/contact-cosmetique-symphytum/','page_only'],
+ 'fleursdecafe.fr':['','absent'],
+ 'kaleparis.com':['https://www.kaleparis.com/contact','confirmed'],
+ 'nansca.com':['https://nansca.com/contact','confirmed'],
+ 'la-canopee.com':['https://www.la-canopee.com/pages/contact','confirmed'],
+ 'odenya.fr':['https://odenya.fr/contact/','confirmed'],
+ 'caliece.fr':['https://caliece.fr/contact/','confirmed'],
+ 'tasha.fr':['https://tasha.fr/pages/contact','page_only'],
+ 'framb.fr':['https://framb.fr/pages/contact','page_only']
+};
+function formFor(p){
+ try{
+  const url=webUrl(p?.website),host=url?new URL(url).hostname.toLowerCase().replace(/^www\./,''):'';
+  if(Object.prototype.hasOwnProperty.call(PUBLIC_FORMS,host)){
+   const [link,status]=PUBLIC_FORMS[host];return {url:link,status};
+  }
+ }catch{}
+ const url=webUrl(p?.contactPage);
+ const status=url?(p?.contactFormStatus==='confirmed'?'confirmed':'page_only'):'absent';
+ return {url,status};
+}
+async function copyToClipboard(value){
+ const valueToCopy=String(value||'').trim();
+ if(!valueToCopy){toast('Aucun email rédigé pour cette boutique.');return false}
+ try{
+  if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(valueToCopy)}
+  else{
+   const input=document.createElement('textarea');input.value=valueToCopy;input.readOnly=true;
+   input.style.position='fixed';input.style.top='-2000px';document.body.appendChild(input);
+   input.focus();input.select();const ok=document.execCommand('copy');input.remove();
+   if(!ok)throw new Error('Copie refusée');
+  }
+  toast('✓ Mail copié ! Ouvre le formulaire, puis colle-le dans « Message ».');return true
+ }catch{toast('Copie bloquée : sélectionne et copie le texte directement dans l’éditeur.');return false}
+}
+
 function emailUrl(s){const e=txt(s,240);return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)?'mailto:'+encodeURIComponent(e):'';}
 function phoneUrl(s){const p=txt(s,50).replace(/[^0-9+]/g,'');return p.replace(/\D/g,'').length>=5?'tel:'+p:''}
 function sanitize(raw,source='local'){
@@ -60,7 +101,7 @@ function sanitize(raw,source='local'){
  offer:txt(get(raw,['offer','prix','montant','devis']),35),
  help:txt(get(raw,['help','aide','prestation']),2000),
  notes:txt(get(raw,['notes','note','commentaire']),4000),
- contactPage:txt(raw.contactPage||'',340), verifiedAt:isoDate(raw.verifiedAt), emailTool:txt(raw.emailTool||'',110),
+ contactPage:txt(raw.contactPage||'',340), contactFormStatus:['confirmed','page_only','absent'].includes(raw.contactFormStatus)?raw.contactFormStatus:'', verifiedAt:isoDate(raw.verifiedAt), emailTool:txt(raw.emailTool||'',110),
  problems:txt(raw.problems||'',3500), opportunities:txt(raw.opportunities||'',3500),
  priority:['haute','moyenne','basse'].includes(raw.priority)?raw.priority:'',
  qualification:txt(raw.qualification||'',120),
@@ -155,6 +196,9 @@ function cardHtml(r){
  const quickInfo=[r.email?'<span class="contact-mini">✉ '+esc(r.email)+(r.emailStatus==='invalide'?' · invalide':r.emailStatus==='alternatif_a_tester'?' · à tester':'')+'</span>':'',r.phone?'<span class="contact-mini">☎ '+esc(r.phone)+'</span>':''].filter(Boolean).join('');
  const link=(href,label,style)=>href?'<a class="action '+(style||'')+'" href="'+esc(href)+'" '+(href.startsWith('http')?'target="_blank" rel="noopener noreferrer"':'')+'>'+label+'</a>':'<span class="action disabled" aria-disabled="true">'+label+'</span>';
  const writeButton=forOutreach?'<a class="action primary" href="#outreachPanel" data-action="outreach" data-id="'+esc(r.id)+'">✉ Préparer l’email</a>':link(mail,'✉ Écrire','primary');
+ const form=formFor(r);
+ const formButton=form.url?link(form.url,form.status==='confirmed'?'↗ Formulaire de contact':'↗ Page contact','contact-form'):'<span class="action disabled" title="Aucun formulaire confirmé sur le site">Formulaire non trouvé</span>';
+ const copyButton='<button type="button" class="action contact-copy" data-action="copy-contact-mail" data-id="'+esc(r.id)+'">📋 Copier le mail</button>';
  return '<article class="lead-card" data-id="'+esc(r.id)+'">'+
  '<div class="card-head"><div class="avatar" aria-hidden="true">'+esc(initial)+'</div>'+
  '<div class="card-main"><h3 class="lead-name">'+esc(r.name)+'</h3><p class="lead-meta">'+esc(citySector)+'</p></div>'+
@@ -162,7 +206,7 @@ function cardHtml(r){
  '<div class="tags"><span class="status s-'+esc(r.stage)+'">'+esc(LABEL[r.stage]||'À contacter')+'</span>'+relance+'</div>'+
  '<div class="contact-strip">'+(quickInfo||'<span class="contact-mini">Coordonnées à compléter</span>')+'</div>'+
  (r.notes?'<p class="lead-note">'+esc(r.notes.slice(0,150))+(r.notes.length>150?'…':'')+'</p>':'')+
- '<div class="card-actions">'+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
+ '<div class="card-actions">'+copyButton+formButton+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
 }
 function displayDate(s){const p=isoDate(s).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s}
 function filterTo(k){state.filter=k;render();document.querySelector('.board').scrollIntoView({behavior:'smooth',block:'start'})}
@@ -268,7 +312,7 @@ async function importHash(){
  }catch(e){toast("Impossible d'importer ce lien.");}
 }
 function install(){
- fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId};
+ fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId,formFor,copyToClipboard};
  $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
  for(const b of document.querySelectorAll('[data-stage]'))b.addEventListener('click',()=>filterTo(b.dataset.stage));
  for(const b of document.querySelectorAll('[data-summary]'))b.addEventListener('click',()=>filterTo({todo:'a_contacter',free:'gratuit',clients:'cliente'}[b.dataset.summary]||'all'));
@@ -276,6 +320,13 @@ function install(){
  $('cards').addEventListener('click',e=>{
   const b=e.target.closest('[data-action]');if(!b)return;
   if(b.dataset.action==='edit'){edit(b.dataset.id);return}
+  if(b.dataset.action==='copy-contact-mail'){
+   e.preventDefault();
+   const p=state.records.find(x=>x.id===b.dataset.id);
+   const draft=p?.outreachDraftBody||window.MailotionOutreach?.draftFor(p?.id)?.body||'';
+   void copyToClipboard(draft);
+   return;
+  }
   if(b.dataset.action==='outreach'){
    e.preventDefault();
    if(!window.MailotionOutreach?.select(b.dataset.id))toast('Ce contact n’est pas dans la file de prospection. Vérifie sa fiche et son historique.');
