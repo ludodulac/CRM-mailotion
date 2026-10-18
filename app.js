@@ -131,7 +131,7 @@ function sanitize(raw,source='local'){
  help:txt(get(raw,['help','aide','prestation']),2000),
  notes:txt(get(raw,['notes','note','commentaire']),4000),
  contactPage:txt(raw.contactPage||'',340), contactFormStatus:['confirmed','page_only','absent'].includes(raw.contactFormStatus)?raw.contactFormStatus:'',
- newsletterUrl:txt(raw.newsletterUrl||'',350), newsletterStatus:['found','not_verified'].includes(raw.newsletterStatus)?raw.newsletterStatus:'', newsletterLocation:txt(raw.newsletterLocation||'',280), newsletterReviewedAt:isoDate(raw.newsletterReviewedAt), verifiedAt:isoDate(raw.verifiedAt), emailTool:txt(raw.emailTool||'',110),
+ newsletterUrl:txt(raw.newsletterUrl||'',350), newsletterStatus:['found','not_verified'].includes(raw.newsletterStatus)?raw.newsletterStatus:'', newsletterLocation:txt(raw.newsletterLocation||'',280), newsletterReviewedAt:isoDate(raw.newsletterReviewedAt), newsletterSubscribed:raw.newsletterSubscribed===true, verifiedAt:isoDate(raw.verifiedAt), emailTool:txt(raw.emailTool||'',110),
  problems:txt(raw.problems||'',3500), opportunities:txt(raw.opportunities||'',3500),
  priority:['haute','moyenne','basse'].includes(raw.priority)?raw.priority:'',
  qualification:txt(raw.qualification||'',120),
@@ -200,6 +200,18 @@ function displaySubset(){const q=norm(state.query);return state.records.filter(r
  if(!q)return true;
  return norm([r.name,r.city,r.sector,r.email,r.phone,r.contact,r.website,r.notes,r.help].join(' ')).includes(q);
  }).sort((a,b)=>{const ar=isFollowup(a),br=isFollowup(b);if(ar!==br)return ar?-1:1;return a.name.localeCompare(b.name,'fr')})}
+function setNewsletterSubscribed(id,checked){
+ const p=state.records.find(r=>r.id===id);
+ if(!p)return false;
+ const value=checked===true;
+ if(p.newsletterSubscribed!==value){
+  p.newsletterSubscribed=value;
+  p.updatedAt=new Date().toISOString();
+  persist();
+ }
+ render();
+ return true;
+}
 function render(){
  $('totalCount').textContent=count('all');
  $('todoCount').textContent=count('a_contacter');
@@ -230,7 +242,8 @@ function cardHtml(r){
  const formButton=form.url?link(form.url,form.status==='confirmed'?'↗ Formulaire de contact':'↗ Page contact','contact-form'):'<span class="action disabled" title="Aucun formulaire confirmé sur le site">Formulaire non trouvé</span>';
  const copyButton='<button type="button" class="action contact-copy" data-action="copy-contact-mail" data-id="'+esc(r.id)+'">📋 Copier le mail</button>';
  const newsletter=newsletterFor(r);
- const newsletterButton=newsletter.url?link(newsletter.url,newsletter.status==='found'?'✉ S’inscrire à la newsletter':'🔎 Chercher la newsletter','newsletter-action'):'<span class="action disabled" aria-disabled="true">Newsletter non trouvée</span>';
+ const newsletterButton=r.newsletterSubscribed?'<span class="action disabled newsletter-action" aria-disabled="true">✓ Newsletter déjà suivie</span>':(newsletter.url?link(newsletter.url,newsletter.status==='found'?'✉ S’inscrire à la newsletter':'🔎 Chercher la newsletter','newsletter-action'):'<span class="action disabled" aria-disabled="true">Newsletter non trouvée</span>');
+ const newsletterCheckbox='<label class="newsletter-toggle"><input type="checkbox" data-action="newsletter-toggle" data-id="'+esc(r.id)+'" '+(r.newsletterSubscribed?'checked ':'')+'> Déjà inscrit</label>';
  return '<article class="lead-card" data-id="'+esc(r.id)+'">'+
  '<div class="card-head"><div class="avatar" aria-hidden="true">'+esc(initial)+'</div>'+
  '<div class="card-main"><h3 class="lead-name">'+esc(r.name)+'</h3><p class="lead-meta">'+esc(citySector)+'</p></div>'+
@@ -238,7 +251,8 @@ function cardHtml(r){
  '<div class="tags"><span class="status s-'+esc(r.stage)+'">'+esc(LABEL[r.stage]||'À contacter')+'</span>'+relance+'</div>'+
  '<div class="contact-strip">'+(quickInfo||'<span class="contact-mini">Coordonnées à compléter</span>')+'</div>'+
  (r.notes?'<p class="lead-note">'+esc(r.notes.slice(0,150))+(r.notes.length>150?'…':'')+'</p>':'')+
- '<div class="card-actions">'+copyButton+formButton+newsletterButton+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
+ '<div class="newsletter-card-row">'+newsletterButton+newsletterCheckbox+'</div>'+
+ '<div class="card-actions">'+copyButton+formButton+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
 }
 function displayDate(s){const p=isoDate(s).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s}
 function filterTo(k){state.filter=k;render();document.querySelector('.board').scrollIntoView({behavior:'smooth',block:'start'})}
@@ -344,7 +358,7 @@ async function importHash(){
  }catch(e){toast("Impossible d'importer ce lien.");}
 }
 function install(){
- fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId,formFor,newsletterFor,copyToClipboard,formMessage};
+ fillStageOptions();load();render();window.MailotionCRM={state,render,persist,sanitize,toast,edit,today,mergeContacts,findMatch,esc,norm,makeId,formFor,newsletterFor,setNewsletterSubscribed,copyToClipboard,formMessage};
  $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
  for(const b of document.querySelectorAll('[data-stage]'))b.addEventListener('click',()=>filterTo(b.dataset.stage));
  for(const b of document.querySelectorAll('[data-summary]'))b.addEventListener('click',()=>filterTo({todo:'a_contacter',free:'gratuit',clients:'cliente'}[b.dataset.summary]||'all'));
@@ -363,6 +377,10 @@ function install(){
    e.preventDefault();
    if(!window.MailotionOutreach?.select(b.dataset.id))toast('Ce contact n’est pas dans la file de prospection. Vérifie sa fiche et son historique.');
   }
+ });
+ $('cards').addEventListener('change',e=>{
+  const box=e.target.closest('input[data-action="newsletter-toggle"]');
+  if(box)setNewsletterSubscribed(box.dataset.id,box.checked);
  });
  $('leadForm').addEventListener('submit',handleForm);$('deleteBtn').addEventListener('click',deleteLead);
  for(const b of document.querySelectorAll('[data-close]'))b.addEventListener('click',()=>closeDialog($(b.dataset.close)));
