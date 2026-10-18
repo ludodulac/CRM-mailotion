@@ -83,3 +83,14 @@ main.container{margin-top:-54px;position:relative}.stats{display:grid;grid-templ
 #outreachSource{font-size:11px;font-weight:800;color:#6e42b9;display:inline-block;margin-top:1px;text-underline-offset:3px}
 #outreachSource[hidden]{display:none}
 .outreach-research-help{font-size:10.5px;color:#8e7c9c;line-height:1.6;margin:12px 0 0}
+
+/* Contacts directs : copier le texte, puis ouvrir la page de la boutique. */
+.card-actions{flex-wrap:wrap}
+.card-actions .action{flex:1 1 calc(50% - 10px);box-sizing:border-box;text-align:center}
+.card-actions .contact-copy{font-family:inherit;cursor:pointer}
+.card-actions .contact-form{color:#50368d;background:#f6f0ff;border-color:#dacbef}
+.outreach-form-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}
+.outreach-form-actions .button{min-width:0;box-sizing:border-box;padding:10px 7px;line-height:1.35}
+.outreach-form-actions .button.disabled{opacity:.43;pointer-events:none}
+.outreach-form-help{font-size:11px;line-height:1.55;color:#726080;margin:1px 0 8px}
+@media (max-width:400px){.outreach-form-actions{grid-template-columns:1fr}.card-actions .action{font-size:11.5px}}
