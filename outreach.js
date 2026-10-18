@@ -115,7 +115,7 @@ function renderPreview(){
  open.textContent=route.status==='confirmed'?'↗ Ouvrir le formulaire':route.url?'↗ Ouvrir la page contact':'Formulaire non trouvé';
  open.classList.toggle('disabled',!valid||!body||!route.url);
  open.setAttribute('aria-disabled',valid&&body&&route.url?'false':'true');
- $('outreachFormStatus').textContent=route.status==='confirmed'?'Copie le mail puis colle-le dans le formulaire (envoi manuel).'
+ $('outreachFormStatus').textContent=route.status==='confirmed'?'Le texte copié est adapté au formulaire et indique ton adresse email pour les réponses.'
    :route.url?'Page de contact trouvée ; formulaire non confirmé. Vérifie avant de coller le message.'
    :'Aucun formulaire de contact fiable trouvé pour ce site.';
  const ready=mailAllowed&&!!subject&&!!body,link=$('outreachCompose');
@@ -153,7 +153,7 @@ function init(){
  $('outreachLead').addEventListener('change',e=>setLead(e.target.value));
  $('outreachSkip').addEventListener('click',skip);
  $('outreachSubject').addEventListener('input',saveDraft);$('outreachBody').addEventListener('input',saveDraft);
- $('outreachCopy').addEventListener('click',()=>{if(selectable(current()))void crm().copyToClipboard($('outreachBody').value)});
+ $('outreachCopy').addEventListener('click',()=>{if(selectable(current()))void crm().copyToClipboard(crm().formMessage($('outreachBody').value))});
  $('outreachFormOpen').addEventListener('click',event=>{if(!selectable(current())||!$('outreachBody').value.trim()||!crm().formFor(current()).url)event.preventDefault()});
  $('outreachCompose').addEventListener('click',openDraft);$('outreachConfirm').addEventListener('click',confirmSent);
  window.addEventListener('mailotion:changed',()=>setTimeout(refresh,110));
