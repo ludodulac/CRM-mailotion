@@ -125,7 +125,7 @@ function renderPreview(){
  checked.disabled=!p;
  const nLink=$('outreachNewsletterOpen');
  nLink.href=!subscribed&&nl.url?nl.url:'#';
- nLink.textContent=subscribed?'✓ Newsletter déjà suivie':(nl.status==='found'?'✉ S’inscrire à la newsletter':nl.url?'🔎 Chercher la newsletter':'Newsletter non trouvée');
+ nLink.textContent=subscribed?'✓ Newsletter déjà suivie':(nl.status==='found'?'✉ S’inscrire à la newsletter':nl.url?'🔎 Inscription non vérifiée':'Newsletter non trouvée');
  nLink.classList.toggle('disabled',subscribed||!nl.url);
  nLink.setAttribute('aria-disabled',!subscribed&&nl.url?'false':'true');
  $('outreachNewsletterStatus').textContent=subscribed?'Inscription cochée. Décoche « Déjà inscrit » pour réactiver le bouton.'
