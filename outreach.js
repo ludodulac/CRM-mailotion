@@ -96,7 +96,7 @@ function renderPreview(){
  const subject=$('outreachSubject').value.trim(),body=$('outreachBody').value.trim();
  $('outreachPreviewSubject').textContent=valid?subject:'Aucun mail à préparer';
  $('outreachPreviewTo').textContent=valid?(mailAllowed?'À : '+p.email:'Contact par formulaire ou page de contact'):'Aucune boutique disponible.';
- $('outreachPreviewBody').textContent=valid?body:'';
+ $('outreachPreviewBody').textContent=valid?(mailAllowed?body:crm().formMessage(body)):'';
  $('outreachRecipient').textContent=valid?(mailAllowed?'Destinataire : '+p.email:'Boutique : '+p.name+' · Contact web'):'Aucun prospect éligible.';
  const badge=document.querySelector('.outreach-live');if(badge)badge.textContent=valid&&body?'● MAIL COMPLET':'○ À RÉDIGER';
  let warning='';
@@ -116,7 +116,7 @@ function renderPreview(){
  open.classList.toggle('disabled',!valid||!body||!route.url);
  open.setAttribute('aria-disabled',valid&&body&&route.url?'false':'true');
  $('outreachFormStatus').textContent=route.status==='confirmed'?'Le texte copié est adapté au formulaire et indique ton adresse email pour les réponses.'
-   :route.url?'Page de contact trouvée ; formulaire non confirmé. Vérifie avant de coller le message.'
+   :route.url?'La copie ajoute ton adresse de réponse. Page de contact à vérifier avant l’envoi.'
    :'Aucun formulaire de contact fiable trouvé pour ce site.';
  const ready=mailAllowed&&!!subject&&!!body,link=$('outreachCompose');
  link.href=ready?'mailto:'+encodeURIComponent(p.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body):'#';
