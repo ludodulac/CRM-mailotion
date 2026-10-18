@@ -63,7 +63,7 @@ function newsletterFor(p){
  let known=null;
  try{
   const site=webUrl(p?.website);
-  const host=site?new URL(site).hostname.toLowerCase().replace(/^www\\./,''):'';
+  const host=site?new URL(site).hostname.toLowerCase().replace(/^www[.]/,''):'';
   known=PUBLIC_NEWSLETTERS[host]||null;
  }catch{}
  const direct=webUrl(p?.newsletterUrl);
