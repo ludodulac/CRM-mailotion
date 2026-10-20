@@ -42,8 +42,8 @@ assert.ok(outreach.includes("state.opened===p.id") && outreach.includes('recordO
  'Le CRM ne confirme pas une ouverture de brouillon comme un envoi');
 assert.ok(outreach.includes("if(!confirm("), 'Validation humaine avant historique d’envoi');
 
-const extract=outreach.replace(/if\\(document\\.readyState==='loading'\\)document\\.addEventListener\\('DOMContentLoaded',init,\\{once:true\\}\\);else init\\(\\);\\n\\}\\)\\(\\);/,
- 'return {eligible,selectable,queue,alreadySent,isInvalid,values,fallback};\\n})();');
+const extract=outreach.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/,
+ 'return {eligible,selectable,queue,alreadySent,isInvalid,values,fallback};\n})();');
 assert.notEqual(extract,outreach,'Extraire les fonctions actuelles de prospection');
 const leads=[
  {id:'a',name:'Boutique Bonjour',email:'contact@bonjour.fr',stage:'a_contacter',lastContact:'',priority:'haute'},
@@ -72,7 +72,7 @@ assert.equal(funcs.selectable(leads[4]),true,'Email manquant orienté vers formu
 const cur=funcs.values({website:'https://echlo-cosmetique.fr'});
 assert.ok(cur.subject.includes('coffret découverte')&&cur.body.includes('ÉCHLO'),
  'La maquette publique personnalisée peut servir de secours');
-assert.equal((cur.body.match(/\\?/g)||[]).length,1,'Un seul point de question dans la prospection individualisée');
+assert.equal((cur.body.match(/\?/g)||[]).length,1,'Un seul point de question dans la prospection individualisée');
 assert.ok(!cur.body.includes('https://www.ludovicdulac.com/7841a0d7'),
  'Pas de lien vers la page pilote dans le premier email');
 const custom=funcs.values({website:'https://echlo-cosmetique.fr',outreachDraftSubject:'Objet validé',outreachDraftBody:'Message validé par l’utilisateur'});
