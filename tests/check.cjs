@@ -33,12 +33,18 @@ assert.ok(html.includes('id="outreachCompose"')&&html.includes('id="outreachConf
 assert.ok(html.includes('src="./outreach.js"'));
 assert.ok(sw.includes('outreach.js'),'Prospection disponible après installation de la PWA');
 assert.ok(outreach.includes('mailto:')&&outreach.includes('recordOutreachSent'));
-assert.ok(outreach.includes('Je développe actuellement MAILOTION'));
-assert.ok(outreach.includes('Je vous propose de m\u0027en occuper gratuitement'));
-assert.ok(outreach.includes('As-tu réellement appuyé'));
-const extract=outreach.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/,
- 'return {eligible,greeting,queue,alreadySent,isInvalid};\n})();');
-assert.notEqual(extract,outreach,'Extraire les fonctions pures de prospection');
+// L'atelier actuel contient UN email complet et un objet par boutique.
+// L'utilisateur modifie librement le brouillon, puis ouvre sa messagerie.
+assert.ok(outreach.includes('outreachDraftSubject') && outreach.includes('outreachDraftBody'),
+ 'Chaque boutique conserve son objet et son email complet');
+assert.ok(outreach.includes('function openDraft(') && outreach.includes('function confirmSent('));
+assert.ok(outreach.includes("state.opened===p.id") && outreach.includes('recordOutreachSent('),
+ 'Le CRM ne confirme pas une ouverture de brouillon comme un envoi');
+assert.ok(outreach.includes("if(!confirm("), 'Validation humaine avant historique d’envoi');
+
+const extract=outreach.replace(/if\\(document\\.readyState==='loading'\\)document\\.addEventListener\\('DOMContentLoaded',init,\\{once:true\\}\\);else init\\(\\);\\n\\}\\)\\(\\);/,
+ 'return {eligible,selectable,queue,alreadySent,isInvalid,values,fallback};\\n})();');
+assert.notEqual(extract,outreach,'Extraire les fonctions actuelles de prospection');
 const leads=[
  {id:'a',name:'Boutique Bonjour',email:'contact@bonjour.fr',stage:'a_contacter',lastContact:'',priority:'haute'},
  {id:'b',name:'Boutique Contactée',email:'contact@deja.fr',stage:'contactee'},
@@ -52,30 +58,27 @@ const outreachContext={window:{
  MailotionCloud:{getActions:()=>[{prospectId:'d',type:'email_envoye',status:'terminee'}],getEmails:()=>[]}
 }};
 const funcs=vm.runInNewContext(extract,outreachContext);
-assert.equal(funcs.queue().length,2,'Aucune boutique déjà contactée ou invalide dans la file');
+const queueIds=funcs.queue().map(p=>p.id);
 assert.equal(funcs.queue()[0].id,'a','Prospect prioritaire en premier');
-assert.equal(funcs.greeting(leads[0]),'Bonjour à l’équipe de Boutique Bonjour,');
-assert.equal(funcs.greeting(leads[5]),'Bonjour Paul,');
-assert.equal(funcs.greeting({name:'ÉCHLO',contact:''}),'Bonjour à l’équipe d’ÉCHLO,');
-assert.equal(funcs.greeting({name:'Odenya',contact:''}),'Bonjour à l’équipe d’Odenya,');
-assert.equal(funcs.eligible(leads[2]),false,'Jamais proposer un email invalide');
-assert.equal(funcs.eligible(leads[3]),false,'Ne pas contacter une deuxième fois le même prospect');
+assert.equal(queueIds.length,4,'Deux emails possibles, deux contacts via formulaire');
+assert.ok(queueIds.includes('c')&&queueIds.includes('e'),'Les boutiques sans email valide restent joignables via formulaire');
+assert.ok(!queueIds.includes('b')&&!queueIds.includes('d'),'Aucun nouvel email pour les boutiques déjà contactées');
+assert.equal(funcs.eligible(leads[0]),true,'Adresse présente et prospect non contacté');
+assert.equal(funcs.eligible(leads[2]),false,'Email rejeté jamais autorisé à l’envoi');
+assert.equal(funcs.eligible(leads[3]),false,'Envoi déjà historisé interdit');
+assert.equal(funcs.eligible(leads[4]),false,'Adresse manquante jamais utilisée');
+assert.equal(funcs.selectable(leads[2]),true,'Email invalide orienté vers formulaire');
+assert.equal(funcs.selectable(leads[4]),true,'Email manquant orienté vers formulaire');
+const cur=funcs.values({website:'https://echlo-cosmetique.fr'});
+assert.ok(cur.subject.includes('coffret découverte')&&cur.body.includes('ÉCHLO'),
+ 'La maquette publique personnalisée peut servir de secours');
+assert.equal((cur.body.match(/\\?/g)||[]).length,1,'Un seul point de question dans la prospection individualisée');
+assert.ok(!cur.body.includes('https://www.ludovicdulac.com/7841a0d7'),
+ 'Pas de lien vers la page pilote dans le premier email');
+const custom=funcs.values({website:'https://echlo-cosmetique.fr',outreachDraftSubject:'Objet validé',outreachDraftBody:'Message validé par l’utilisateur'});
+assert.equal(custom.subject,'Objet validé','Le sujet privé prévaut sur le modèle');
+assert.equal(custom.body,'Message validé par l’utilisateur','Le texte privé prévaut sur le modèle');
+assert.equal(funcs.values({website:'https://exemple-inconnu.fr'}).body,'',
+ 'Ne jamais inventer le contenu d’un brouillon sans modèle');
 
-assert.ok(outreach.includes('D’ailleurs')||outreach.includes('outreachPersonal'),'Questions par boutique disponibles');
-assert.ok(outreach.includes('quelques boutiques en ligne'),"Le texte commun fonctionne pour les sites non Shopify.");
-const extractedCompose=outreach.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/,
- 'return {composeMessage};\n})();');
-const formMap={
- outreachGreeting:{value:'Bonjour à l’équipe de Boutique Exemple,'},
- outreachBody:{value:"Je développe MAILOTION.\n\nBonne journée,\nLudovic — MAILOTION"},
- outreachPersonal:{value:"D'ailleurs, j'ai vu que vous proposez des coffrets. Avez-vous une relance de panier ? Et des conseils après achat ?"}
-};
-const context={document:{getElementById:id=>formMap[id]}};
-const compose=vm.runInNewContext(extractedCompose,context).composeMessage();
-assert.ok(compose.startsWith('Bonjour à l’équipe de Boutique Exemple,'),"Conserver la formule d'accueil");
-assert.ok(compose.indexOf("D'ailleurs, j'ai vu que")>compose.indexOf("Je développe MAILOTION"),"Questions ajoutées après le texte");
-assert.ok(compose.indexOf("D'ailleurs, j'ai vu que")<compose.indexOf("Bonne journée"),"Questions placées avant la signature");
-assert.equal((compose.match(/\?/g)||[]).length,2,'Deux questions personnalisées');
-
-
-console.log('PASS - scripts, UI, 11 contacts + prospection, données privées, merge, conflits, dédoublonnage, schéma Google Sheets.');
+console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
