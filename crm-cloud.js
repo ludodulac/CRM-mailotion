@@ -86,7 +86,10 @@ const baseURL=()=> 'https://sheets.googleapis.com/v4/spreadsheets/'+encodeURICom
 const clean=(table,raw)=>{
  const obj=raw&&typeof raw==='object'?clone(raw):{};
  if(table==='Prospects')return api().sanitize(obj,obj.origin==='github'?'github':'local');
- if(table==='Actions')return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),date:val(obj.date,10),due:val(obj.due,10),type:val(obj.type,70),status:val(obj.status,35)||'a_faire',description:val(obj.description,2600),next:val(obj.next,800),channel:['whatsapp','email','telephone'].includes(obj.channel)?obj.channel:'',recipient:val(obj.recipient,240),message:val(obj.message,1800),callGuide:Array.isArray(obj.callGuide)?obj.callGuide.slice(0,15).map(item=>({q:val(item?.q,170),a:val(item?.a,560)})).filter(item=>item.q&&item.a):[],completedAt:val(obj.completedAt,45),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
+ if(table==='Actions')return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),date:val(obj.date,10),due:val(obj.due,10),type:val(obj.type,70),status:val(obj.status,35)||'a_faire',description:val(obj.description,2600),next:val(obj.next,800),channel:['whatsapp','email','telephone'].includes(obj.channel)?obj.channel:'',recipient:val(obj.recipient,240),message:val(obj.message,1800),callGuide:Array.isArray(obj.callGuide)?obj.callGuide.slice(0,15).map(item=>({q:val(item?.q,170),a:val(item?.a,560)})).filter(item=>item.q&&item.a):[],diagnosticAnswers:obj.diagnosticAnswers&&typeof obj.diagnosticAnswers==='object'&&!Array.isArray(obj.diagnosticAnswers)?Object.fromEntries(Object.entries(obj.diagnosticAnswers).slice(0,35).filter(([key,value])=>/^[a-z_]{2,40}$/.test(key)&&['yes','no','na',''].includes(value))):{},
+ diagnosticNotes:obj.diagnosticNotes&&typeof obj.diagnosticNotes==='object'?{goal:val(obj.diagnosticNotes.goal,250),tool:val(obj.diagnosticNotes.tool,150),notes:val(obj.diagnosticNotes.notes,1000)}:{goal:'',tool:'',notes:''},
+ diagnosticEvidence:obj.diagnosticEvidence&&typeof obj.diagnosticEvidence==='object'?Object.fromEntries(Object.entries(obj.diagnosticEvidence).slice(0,20).filter(([key,value])=>/^[a-z_]{2,40}$/.test(key)&&typeof value==='string').map(([key,value])=>[key,val(value,300)])):{},
+ diagnosticUpdatedAt:val(obj.diagnosticUpdatedAt,45),completedAt:val(obj.completedAt,45),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
  return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),email:val(obj.email,240),status:knownEmailStatuses.has(obj.status)?obj.status:'trouve_non_teste',active:obj.active===true,verifiedAt:val(obj.verifiedAt,10),notes:val(obj.notes,2000),source:val(obj.source,450),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
 };
 function values(table,item){
@@ -306,6 +309,29 @@ function markTaskDone(id){
  if(a.message&&['whatsapp','email'].includes(a.channel)&&!confirm('As-tu vraiment envoyé le message ?\n\nCocher Fait enregistre uniquement une action déjà réalisée.'))return false;
  completeAction(id);return true;
 }
+// Les diagnostics sont des notes privées, pas des tâches à accomplir ou des contacts envoyés.
+function getDiagnostic(prospectId){
+ const id='diagnostic-'+val(prospectId,120);
+ return clone(state.actions.find(a=>a.id===id)||null);
+}
+function saveDiagnostic(prospectId,answers,notes){
+ const prospect=getProspect(prospectId);
+ if(!prospect)return false;
+ const id='diagnostic-'+val(prospectId,120),now=new Date().toISOString();
+ const previous=state.actions.find(a=>a.id===id);
+ const cleanAnswers=Object.fromEntries(Object.entries(answers||{}).slice(0,35).filter(([key,v])=>/^[a-z_]{2,40}$/.test(key)&&['yes','no','na',''].includes(v)));
+ const cleanNotes={goal:val(notes?.goal,250),tool:val(notes?.tool,150),notes:val(notes?.notes,1000)};
+ const action={
+  ...(previous||{}),id,prospectId,date:date(),due:'',type:'note',status:'terminee',
+  description:'Diagnostic email — questions cochées',next:'',
+  diagnosticAnswers:cleanAnswers,diagnosticNotes:cleanNotes,
+  diagnosticEvidence:previous?.diagnosticEvidence||{},
+  diagnosticUpdatedAt:now,createdAt:previous?.createdAt||now,updatedAt:now,completedAt:previous?.completedAt||now
+ };
+ if(previous)Object.assign(previous,action);else state.actions.push(action);
+ saveLocal();renderToday();scheduleCloud();
+ return true;
+}
 function postponeAction(id){
  const a=state.actions.find(x=>x.id===id);if(!a)return;
  const choice=prompt('Nouvelle date de relance (AAAA-MM-JJ) :',a.due||date());
@@ -456,7 +482,7 @@ function init(){
  snapshot();addUIEvents();renderToday();
  if(state.client&&state.sheet)showCloud('Connexion privée configurée, appuie sur « Connecter Google » pour synchroniser.');
  else showCloud('Non connectée. Tes fiches actuelles restent sur ce téléphone, sans suppression.');
- window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails),markTaskDone,editTask:openAction,refreshTasks:renderToday,recordOutreachSent};
+ window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails),getDiagnostic,saveDiagnostic,markTaskDone,editTask:openAction,refreshTasks:renderToday,recordOutreachSent};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

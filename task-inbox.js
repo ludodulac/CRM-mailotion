@@ -47,6 +47,7 @@ function card(a,lookup){
    '<div class="inbox-task-actions">'+
    (message?'<button type="button" data-inbox-copy="'+esc(a.id)+'">📋 Copier le message</button>':'')+
    (url?'<a href="'+esc(url)+'" target="'+(a.channel==='telephone'?'_self':'_blank')+'" rel="noopener noreferrer">'+esc(a.channel==='whatsapp'?'Ouvrir WhatsApp':a.channel==='email'?'Écrire':"Appeler")+' ↗</a>':'')+
+   (a.channel==='telephone'?'<button type="button" data-diag-prospect="'+esc(a.prospectId)+'">☑ Questions à cocher</button>':'')+
    '<button type="button" data-inbox-edit="'+esc(a.id)+'">Modifier</button></div></article>';
 }
 function render(){
@@ -79,7 +80,8 @@ function init(){
   if(b.dataset.inboxCopy){
    const a=window.MailotionCloud?.getActions?.().find(x=>x.id===b.dataset.inboxCopy);
    if(a?.message){const ok=await copyText(a.message);window.MailotionCRM?.toast?.(ok?'✓ Message copié.':'Copie impossible : sélectionne le texte dans la carte.')}
-  }else if(b.dataset.inboxEdit)window.MailotionCloud?.editTask?.(b.dataset.inboxEdit);
+  }else if(b.dataset.diagProspect){window.MailotionDiagnostic?.open?.(b.dataset.diagProspect);}
+  else if(b.dataset.inboxEdit)window.MailotionCloud?.editTask?.(b.dataset.inboxEdit);
  });
  $('taskInboxList')?.addEventListener('change',event=>{
   const box=event.target;if(!box.matches('[data-inbox-done]')||!box.checked)return;

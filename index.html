@@ -20,7 +20,7 @@
 </header>
 <main class="container">
  <section class="task-inbox" id="taskInbox" aria-labelledby="taskInboxTitle">
-   <div class="task-inbox-head"><h2 id="taskInboxTitle">À faire <span id="taskInboxCount"></span></h2><div class="inbox-header-actions"><button type="button" id="inboxConnect" class="button button-primary" hidden>Connecter Google</button><button type="button" id="taskInboxRefresh" class="task-inbox-refresh">↻ Actualiser</button></div></div>
+   <div class="task-inbox-head"><h2 id="taskInboxTitle">À faire <span id="taskInboxCount"></span></h2><div class="inbox-header-actions"><button type="button" id="inboxConnect" class="button button-primary" hidden>Connecter Google</button><button type="button" id="diagnosticLaunch" class="task-inbox-refresh" aria-haspopup="dialog">☑ Questions boutique</button><button type="button" id="taskInboxRefresh" class="task-inbox-refresh">↻ Actualiser</button></div></div>
    <div id="taskInboxList" class="task-inbox-list" aria-live="polite"><p>Chargement…</p></div>
  </section>
  <section class="stats" aria-label="Résumé des contacts">
@@ -113,6 +113,22 @@
  </section>
  <div class="footer"><span>CRM Mailotion • Uniquement pour ta prospection</span><button type="button" class="link-button" id="backupBtn">Sauvegarder tout mon CRM</button><button type="button" class="link-button" id="restoreBtn">Restaurer une sauvegarde</button><input id="restoreInput" type="file" accept=".json,application/json" hidden></div>
 </main>
+<dialog id="diagnosticDialog" class="diagnostic-dialog" aria-labelledby="diagnosticTitle">
+ <div class="diagnostic-head"><div><h2 id="diagnosticTitle">Questions boutique</h2><p id="diagnosticProgress" aria-live="polite"></p></div><button type="button" class="diagnostic-close" id="diagnosticClose" aria-label="Fermer">×</button></div>
+ <div class="diagnostic-body">
+  <label class="diagnostic-label" for="diagnosticProspect">Boutique</label>
+  <select id="diagnosticProspect" class="diagnostic-select"></select>
+  <p class="diagnostic-hint">Une boîte à idées, pas un questionnaire obligatoire. Pose 2 ou 3 questions selon la conversation.</p>
+  <label class="diagnostic-label" for="diagnosticGoal">Leur priorité</label>
+  <textarea id="diagnosticGoal" rows="2" maxlength="250" placeholder="Ex. avoir davantage de deuxièmes commandes…"></textarea>
+  <label class="diagnostic-label" for="diagnosticTool">Leur outil emailing (si connu)</label>
+  <input id="diagnosticTool" maxlength="150" placeholder="Ex. Shopify Email, Klaviyo, autre, inconnu">
+  <div id="diagnosticQuestions" class="diagnostic-questions"></div>
+  <label class="diagnostic-label" for="diagnosticNotes">Notes courtes</label>
+  <textarea id="diagnosticNotes" maxlength="1000" rows="3" placeholder="Ce que la personne a réellement confirmé…"></textarea>
+ </div>
+ <div class="diagnostic-foot"><span id="diagnosticSaved" role="status">À vérifier = non renseigné</span><button type="button" id="diagnosticSave" class="button button-primary">Enregistrer</button></div>
+</dialog>
 <dialog id="leadDialog" class="dialog">
  <form id="leadForm" novalidate><div class="dialog-head"><div><p class="eyebrow accent">FICHE CONTACT</p><h2 id="dialogTitle">Nouvelle boutique</h2></div><button type="button" class="close-btn" data-close="leadDialog" aria-label="Fermer">×</button></div>
  <div class="dialog-scroll">
@@ -174,5 +190,5 @@ Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textar
  <dialog class="dialog" id="timelineDialog"><div class="dialog-head"><div><p class="eyebrow accent">CHRONOLOGIE</p><h2 id="timelineTitle">Historique</h2></div><button type="button" class="close-btn" data-close-cloud="timelineDialog">×</button></div><div class="dialog-scroll"><div id="timelineBody"></div></div><div class="dialog-actions"><button id="timelineAdd" type="button" class="button button-primary">＋ Ajouter une action</button></div></dialog>
  <dialog class="dialog" id="emailDialog"><div class="dialog-head"><div><p class="eyebrow accent">SUIVI DES ADRESSES</p><h2 id="emailTitle">Historique des emails</h2></div><button type="button" class="close-btn" data-close-cloud="emailDialog">×</button></div><div class="dialog-scroll"><div id="emailList"></div><form id="emailForm" class="form-grid"><div class="field span2"><label for="eValue">Email professionnel</label><input type="email" id="eValue" required></div><div class="field"><label for="eStatus">Statut</label><select id="eStatus"><option value="trouve_non_teste">Trouvé, non testé</option><option value="confirme">Fonctionnel confirmé</option><option value="invalide">Invalide</option><option value="alternatif_a_tester">Alternatif à tester</option></select></div><div class="field"><label for="eVerified">Vérifié le</label><input type="date" id="eVerified"></div><div class="field span2"><label for="eNotes">Observations</label><textarea id="eNotes" maxlength="2000"></textarea></div><div class="field span2"><button class="button button-primary" type="submit">＋ Enregistrer cette adresse</button></div></form></div></dialog>
  <div id="toast" role="status" aria-live="polite" class="toast"></div>
-<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script><script src="./simple.js" defer></script><script src="./task-inbox.js" defer></script>
+<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script><script src="./simple.js" defer></script><script src="./task-inbox.js" defer></script><script src="./diagnostic.js" defer></script>
 </body></html>
