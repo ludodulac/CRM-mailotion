@@ -31,6 +31,9 @@ function link(a,to){
 function card(a,lookup){
  const p=lookup.get(a.prospectId),to=recipient(a,p),url=link(a,to);
  const message=String(a.message||'');
+ const qa=Array.isArray(a.callGuide)?a.callGuide.slice(0,15).filter(x=>x?.q&&x?.a):[];
+ const aide=qa.length?'<details class="inbox-qa"><summary>❓ Questions / réponses pendant l’appel</summary>'+
+   '<div class="inbox-qa-content">'+qa.map(x=>'<div class="inbox-qa-item"><b>'+esc(x.q)+'</b><p>'+esc(x.a)+'</p></div>').join('')+'</div></details>':'';
  const date=dayLabel(a.due||'');
  const target=(p?.name||'Boutique')+(p?.contact?' · '+p.contact:'');
  const taskTitle=String(a.description||'Tâche').split('\n')[0].slice(0,160);
@@ -40,6 +43,7 @@ function card(a,lookup){
    '<label class="inbox-check"><input type="checkbox" data-inbox-done="'+esc(a.id)+'" aria-label="J’ai fait cette tâche"><span>Fait</span></label></div>'+
    (meta.length?'<div class="inbox-meta">'+meta.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div>':'')+
    (message?'<div class="inbox-message">'+esc(message)+'</div>':'')+
+   aide+
    '<div class="inbox-task-actions">'+
    (message?'<button type="button" data-inbox-copy="'+esc(a.id)+'">📋 Copier le message</button>':'')+
    (url?'<a href="'+esc(url)+'" target="'+(a.channel==='telephone'?'_self':'_blank')+'" rel="noopener noreferrer">'+esc(a.channel==='whatsapp'?'Ouvrir WhatsApp':a.channel==='email'?'Écrire':"Appeler")+' ↗</a>':'')+
