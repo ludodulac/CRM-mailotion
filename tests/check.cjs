@@ -147,4 +147,35 @@ assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
 assert.ok(sw.includes('mailotion-crm-v16-m006-call-guide'),'Cache Android incrémenté');
 assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
 
+// M007 — questions par boutique, données privées, non supposées à l'avance.
+const diag=read('diagnostic.js');
+new Function(diag);
+for(const id of ['diagnosticLaunch','diagnosticDialog','diagnosticProspect','diagnosticQuestions','diagnosticGoal','diagnosticTool','diagnosticNotes','diagnosticSave','diagnosticSaved','diagnosticClose','diagnosticProgress'])
+ assert.ok(ids.includes(id),'Élément diagnostic présent : '+id);
+assert.ok(html.includes('src="./diagnostic.js"'),'Nouvel écran diagnostique chargé');
+assert.ok(sw.includes("'./diagnostic.js'"),'Diagnostic préchargé pour usage hors ligne');
+assert.ok(sw.includes('mailotion-crm-v17-m007-diagnostic'),'Le cache PWA mobile est renouvelé');
+assert.ok(app.includes('data-diagnostic-prospect'),'Accès depuis chaque fiche boutique');
+assert.ok(inbox.includes('data-diag-prospect'),'Accès depuis la tâche téléphonique');
+assert.ok(cloud.includes('saveDiagnostic')&&cloud.includes('getDiagnostic'),'Accès aux enregistrements privés');
+const answers=api.clean('Actions',{id:'diagnostic-chic',prospectId:'chic',type:'note',status:'terminee',
+ diagnosticAnswers:{welcome:'yes',cart:'no',after_purchase:'',reorder:'na',injection:'<script>'},
+ diagnosticNotes:{goal:'Augmenter le 2e achat',tool:'Shopify Email',notes:'Retour direct du marchand'},
+ diagnosticEvidence:{welcome:'Email reçu le 25 octobre',bad:17}});
+assert.equal(answers.diagnosticAnswers.welcome,'yes');
+assert.equal(answers.diagnosticAnswers.cart,'no');
+assert.equal(answers.diagnosticAnswers.reorder,'na');
+assert.equal(answers.diagnosticAnswers.injection,undefined,'Ne pas conserver de statut non autorisé');
+assert.equal(answers.diagnosticNotes.goal,'Augmenter le 2e achat');
+assert.equal(answers.diagnosticEvidence.welcome,'Email reçu le 25 octobre');
+assert.equal(answers.diagnosticEvidence.bad,undefined);
+const roundtrip=JSON.parse(api.values('Actions',answers)[7]);
+assert.deepEqual(roundtrip.diagnosticAnswers,answers.diagnosticAnswers,'Case cochée préservée dans le JSON privé');
+assert.deepEqual(roundtrip.diagnosticNotes,answers.diagnosticNotes,'Notes préservées dans le JSON privé');
+assert.ok(!JSON.stringify(publicData).includes('diagnosticAnswers'),'Aucune réponse privée dans les contacts publics');
+assert.ok(diag.includes("selected===v?'selected':''"),'Valeurs sauvegardées remises dans les sélecteurs');
+assert.ok(diag.includes('À vérifier'),'Une absence de réponse ne veut pas dire Non');
+assert.ok(diag.includes('Pas utile'),'Une question peut être sans objet pour cette boutique');
+assert.ok(diag.includes('Une boîte à idées')===false,'Les consignes restent dans le HTML et non dans le code');
+
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
