@@ -1,0 +1,52 @@
+/* M003 — une interface simple, sans migration ni suppression des donnees.
+   Le mode complet reste accessible a tout moment. */
+body.crm-simple .top{padding:14px 0 52px}
+body.crm-simple .hero{padding-top:17px;gap:12px}
+body.crm-simple .hero h1{font-size:clamp(27px,5vw,38px);letter-spacing:-1.1px;margin:0 0 7px}
+body.crm-simple .hero-sub{max-width:500px;line-height:1.45;font-size:13px}
+body.crm-simple .eyebrow{display:none}
+body.crm-simple main.container{margin-top:-27px}
+body.crm-simple .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+body.crm-simple .stat{min-height:86px;border-radius:13px;padding:12px 14px;box-shadow:none}
+body.crm-simple .stat strong{font-size:28px}
+body.crm-simple .stat-sub{display:none}
+body.crm-simple .stat[data-summary="free"]{display:none!important}
+body.crm-simple .today-panel{padding:16px;margin-bottom:14px}
+body.crm-simple .today-panel .section-heading{gap:12px}
+body.crm-simple .today-panel .today-sub{display:none}
+body.crm-simple .outreach-panel,body.crm-simple .bottom-help,body.crm-simple .cloud-note{display:none!important}
+body.crm-simple .cloud-panel{padding:10px 14px;margin-bottom:14px}
+body.crm-simple .cloud-title{align-items:center}
+body.crm-simple .cloud-title b{font-size:13px}
+body.crm-simple .cloud-title p{font-size:11px;margin:4px 0}
+body.crm-simple .board{padding:15px}
+body.crm-simple .tabs button[data-stage="gratuit"]{display:none!important}
+body.crm-simple .newsletter-card-row,body.crm-simple .contact-copy,body.crm-simple .contact-form{display:none!important}
+body.crm-simple .lead-card .lead-note{max-height:3.5em;overflow:hidden}
+body.crm-simple .lead-card .contact-strip{margin-bottom:9px}
+body.crm-simple .lead-card .card-actions .action{min-height:41px}
+body.crm-simple .footer #restoreBtn,body.crm-simple .footer #backupBtn{display:none!important}
+body.crm-simple #importBtn,body.crm-simple #exportBtn{display:none!important}
+body.crm-simple #leadDialog .mailotion-advanced-field{display:none!important}
+body.crm-simple #leadDialog.crm-form-expanded .mailotion-advanced-field{display:block!important}
+body.crm-simple #leadDialog.crm-form-expanded .field.span2.mailotion-advanced-field{display:block!important}
+.mode-toggle{border:1px solid #bca6ef;color:#522c9c;background:white}
+body:not(.crm-simple) .mode-toggle{background:#efe7ff}
+.crm-advanced-toggle{grid-column:1/-1;border:1px dashed #aa92d8;background:#faf8ff;border-radius:12px;padding:10px 12px;color:#4a2f78;text-align:center;font-weight:700}
+.crm-advanced-toggle:focus-visible{outline:3px solid #c2a8fa;outline-offset:3px}
+@media(max-width:700px){
+body.crm-simple .hero{flex-wrap:wrap;align-items:flex-start}
+body.crm-simple .hero h1{font-size:31px}
+body.crm-simple .hero-add{min-height:37px}
+body.crm-simple .mode-toggle{min-height:37px}
+body.crm-simple .stats{gap:6px}
+body.crm-simple .stat{padding:10px 8px;min-height:75px}
+body.crm-simple .stat strong{font-size:25px}
+body.crm-simple .stat-name{font-size:11px}
+body.crm-simple .topline{gap:5px}
+body.crm-simple .brand{font-size:19px}
+body.crm-simple .brand-icon{height:34px;width:34px}
+body.crm-simple .privacy-badge{font-size:9px;padding:6px}
+body.crm-simple .today-panel{padding:12px}
+body.crm-simple .board{padding:12px}
+}
