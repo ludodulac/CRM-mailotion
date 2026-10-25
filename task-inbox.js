@@ -56,6 +56,7 @@ function render(){
  const count=$('taskInboxCount');if(count)count.textContent=String(todo.length);
  const shown=todo.slice(0,8);
  const connected=cloud?.status?.().connected===true;
+ const connect=$('inboxConnect');if(connect)connect.hidden=connected;
  const note=!connected?'<div class="inbox-sync-hint">↻ Connecte Google pour retrouver les tâches enregistrées par ChatGPT.</div>':'';
  host.innerHTML=note+(shown.length?shown.map(a=>card(a,leads)).join(''):
  '<div class="inbox-empty">'+(connected?'✓ Rien à faire pour le moment.':'Tes tâches apparaîtront ici après synchronisation.')+'</div>')+
@@ -68,6 +69,7 @@ async function copyText(s){
 }
 function init(){
  $('taskInboxRefresh')?.addEventListener('click',()=>window.MailotionCloud?.sync?.());
+ $('inboxConnect')?.addEventListener('click',()=>document.getElementById('cloudConnect')?.click());
  $('taskInboxList')?.addEventListener('click',async event=>{
   const b=event.target.closest('button');if(!b)return;
   if(b.dataset.inboxCopy){
