@@ -4,8 +4,9 @@
 const KEY='mailotion-crm-display-v1';
 const ADVANCED_IDS=['fCity','fLast','fOffer','fHelp','fPriority','fQualification','fEmailTool','fEmailStatus','fProblems','fOpportunities','fContactPage','fVerifiedAt','fLastAction','fPaidOffer','fProposalSent','fFreeInProgress','fClientAcquired','fSource'];
 const el=id=>document.getElementById(id);
+// Toujours ouvrir sur l'écran simple : l'ancienne préférence « full » ne doit
+// plus réafficher les longs panneaux au prochain lancement.
 let compact=true;
-try{compact=localStorage.getItem(KEY)!=='full'}catch{}
 function apply(){
  document.body.classList.toggle('crm-simple',compact);
  const toggle=el('modeToggle');
@@ -14,9 +15,15 @@ function apply(){
  if(formToggle)formToggle.textContent=compact?'Voir les détails de la fiche':'Afficher les détails';
  window.MailotionTasks?.render?.();
 }
-function setCompact(v){compact=!!v;try{localStorage.setItem(KEY,compact?'simple':'full')}catch{}apply()}
+function setCompact(v){compact=!!v;apply()}
 function init(){
  const toggle=el('modeToggle');if(toggle)toggle.addEventListener('click',()=>setCompact(!compact));
+ const boutiques=el('simpleBoutiquesToggle');
+ if(boutiques)boutiques.addEventListener('click',()=>{
+  const opened=document.body.classList.toggle('simple-boutiques-open');
+  boutiques.setAttribute('aria-expanded',String(opened));
+  boutiques.textContent=opened?'Masquer les boutiques ↑':'Voir les boutiques ↓';
+ });
  const dialog=el('leadDialog'),form=el('leadForm');
  if(dialog&&form){
   for(const id of ADVANCED_IDS){const field=el(id)?.closest('.field');if(field)field.classList.add('mailotion-advanced-field');}
