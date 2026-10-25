@@ -120,4 +120,15 @@ assert.ok(exampleCard.includes('Copier le message')&&exampleCard.includes('data-
 assert.ok(inboxApi.link(actionForm,'+33 6 00 00 00 00').startsWith('https://wa.me/'),'WhatsApp est ouvert sans envoyer');
 assert.equal(inboxApi.active({...actionForm,status:'terminee'}),false,'Une tâche terminée disparaît');
 
+// M005 mobile — le mode simple doit être le défaut, même avec un ancien réglage full.
+assert.ok(html.includes('<body class="crm-simple">'),'Le HTML s’ouvre directement en mode simple');
+assert.ok(html.includes('id="simpleBoutiquesToggle"'),'Boutiques accessibles à la demande');
+assert.ok(html.includes('id="inboxConnect"'),'Google connecté depuis l’écran des tâches');
+assert.ok(!simpleJs.includes('localStorage.getItem(KEY)'),'Ancienne préférence full ignorée au lancement');
+assert.ok(simpleJs.includes("let compact=true"),'Mode simple réinitialisé à chaque ouverture');
+assert.ok(simpleJs.includes('simple-boutiques-open'),'Liste des boutiques repliable');
+assert.ok(simpleCss.includes('body.crm-simple .board{display:none}'),'Fiches boutique masquées en mode simple');
+assert.ok(simpleCss.includes('body.crm-simple.simple-boutiques-open .board{display:block}'),'Boutiques affichables sur demande');
+assert.ok(read('task-inbox.js').includes("connect.hidden=connected"),'Connecter Google proposé lorsque non connecté');
+
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
