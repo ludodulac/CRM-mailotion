@@ -252,7 +252,7 @@ function cardHtml(r){
  '<div class="contact-strip">'+(quickInfo||'<span class="contact-mini">Coordonnées à compléter</span>')+'</div>'+
  (r.notes?'<p class="lead-note">'+esc(r.notes.slice(0,150))+(r.notes.length>150?'…':'')+'</p>':'')+
  '<div class="newsletter-card-row">'+newsletterButton+newsletterCheckbox+'</div>'+
- '<div class="card-actions">'+copyButton+formButton+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
+ '<div class="card-actions">'+copyButton+formButton+writeButton+link(phone,'☎ Appeler','')+link(site,'↗ Site','')+'<button type="button" class="action" data-diagnostic-prospect="'+esc(r.id)+'">☑ Questions boutique</button><button type="button" class="action" data-action="edit" data-id="'+esc(r.id)+'">✎ Fiche</button></div></article>';
 }
 function displayDate(s){const p=isoDate(s).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s}
 function filterTo(k){state.filter=k;render();document.querySelector('.board').scrollIntoView({behavior:'smooth',block:'start'})}
