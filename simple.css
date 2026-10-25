@@ -116,3 +116,15 @@ body.crm-simple .topline{margin-bottom:7px}
  .inbox-header-actions{margin-left:auto}
  .inbox-task-actions a,.inbox-task-actions button{white-space:normal}
 }
+
+/* M006 — aide à l'appel repliable : aucune surcharge tant que fermée. */
+.inbox-qa{border:1px solid #dacbeb;border-radius:10px;background:#f8f5ff;margin-top:12px;overflow:hidden}
+.inbox-qa>summary{list-style:none;cursor:pointer;padding:12px 13px;font-size:13px;font-weight:800;color:#5d369a;min-height:43px;display:flex;align-items:center;justify-content:space-between}
+.inbox-qa>summary::-webkit-details-marker{display:none}
+.inbox-qa>summary:after{content:'+';font-size:20px;line-height:1;padding-left:8px}
+.inbox-qa[open]>summary:after{content:'−'}
+.inbox-qa-content{background:white;border-top:1px solid #e7dcf4;padding:2px 13px 10px}
+.inbox-qa-item{padding:11px 0;border-bottom:1px solid #f1ecf5;font-size:13px;line-height:1.5}
+.inbox-qa-item:last-child{border-bottom:0}
+.inbox-qa-item b{display:block;font-size:13px;color:#3c235c;margin-bottom:3px}
+.inbox-qa-item p{margin:0;color:#50455b;white-space:pre-wrap;overflow-wrap:anywhere}
