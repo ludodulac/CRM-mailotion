@@ -12,6 +12,7 @@ function apply(){
  if(toggle){toggle.textContent=compact?'⚙ Mode complet':'✓ Mode simple';toggle.setAttribute('aria-pressed',compact?'false':'true');}
  const formToggle=el('advancedFormToggle');
  if(formToggle)formToggle.textContent=compact?'Voir les détails de la fiche':'Afficher les détails';
+ window.MailotionTasks?.render?.();
 }
 function setCompact(v){compact=!!v;try{localStorage.setItem(KEY,compact?'simple':'full')}catch{}apply()}
 function init(){
