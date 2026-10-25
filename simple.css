@@ -128,3 +128,39 @@ body.crm-simple .topline{margin-bottom:7px}
 .inbox-qa-item:last-child{border-bottom:0}
 .inbox-qa-item b{display:block;font-size:13px;color:#3c235c;margin-bottom:3px}
 .inbox-qa-item p{margin:0;color:#50455b;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* M007 — page de questions, ouverte seulement à la demande. */
+.diagnostic-dialog{width:min(690px,calc(100% - 18px));max-height:min(94dvh,900px);height:min(94dvh,900px);padding:0;border:1px solid #e3d9ea;border-radius:18px;box-shadow:0 24px 75px #1a143858;background:#fff;color:#291d36;overflow:hidden}
+.diagnostic-dialog::backdrop{background:#171322b8}
+.diagnostic-head,.diagnostic-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;padding:16px 19px}
+.diagnostic-head{border-bottom:1px solid #eae3ef}
+.diagnostic-head h2{font-size:21px;margin:0;color:#2f1d44}
+.diagnostic-head p{margin:4px 0 0;color:#705d7f;font-size:12px}
+.diagnostic-close{border:1px solid #e9e1ee;border-radius:9px;background:#faf8fd;font-size:26px;line-height:1;width:42px;height:42px;flex:none;color:#5e407b;cursor:pointer}
+.diagnostic-body{overflow-y:auto;overscroll-behavior:contain;height:calc(100% - 134px);padding:15px 19px 35px}
+.diagnostic-label{display:block;font-size:13px;font-weight:780;margin:14px 0 7px;color:#39284a}
+.diagnostic-select,.diagnostic-body textarea,.diagnostic-body input{box-sizing:border-box;border-radius:9px;border:1px solid #cec3d9;background:#fff;padding:11px 12px;width:100%;min-height:42px;font:inherit;font-size:14px;color:#302139}
+.diagnostic-body textarea{resize:vertical}
+.diagnostic-body :focus-visible{outline:3px solid #9663d9;outline-offset:2px}
+.diagnostic-hint{color:#5b5364;font-size:13px;line-height:1.4;margin:13px 0}
+.diag-section h3{font-size:15px;font-weight:820;margin:24px 0 7px;color:#48305a}
+.diag-row{border-bottom:1px solid #f1ecf4;padding:11px 0;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.diag-row-text{flex:1;min-width:0;font-size:13px;line-height:1.45;font-weight:600}
+.diag-row-text small{display:block;color:#5f8a67;font-size:11px;font-weight:600;line-height:1.4;margin-top:3px}
+.diag-row select{width:135px;min-width:135px;border:1px solid #dacfe8;background:#faf8fd;border-radius:9px;padding:9px 6px;font-size:12px;font-weight:750;color:#5a3e73;min-height:43px}
+.diag-extra{margin-top:22px;border:1px solid #e4dbeb;border-radius:10px}
+.diag-extra summary{font-size:13px;padding:13px;font-weight:750;color:#5c3c86;cursor:pointer}
+.diag-extra .diag-row{padding-left:12px;padding-right:12px}
+.diagnostic-foot{border-top:1px solid #ebe4f0;min-height:58px}
+.diagnostic-foot span{font-size:12px;color:#675775;line-height:1.4}
+.diagnostic-foot button{flex:none}
+@media(max-width:600px){
+ .diagnostic-dialog{height:100dvh;max-height:100dvh;max-width:none;width:100%;margin:0;border:0;border-radius:0}
+ .diagnostic-head,.diagnostic-foot{padding:12px 14px}
+ .diagnostic-head h2{font-size:20px}
+ .diagnostic-body{padding:8px 14px 24px;height:calc(100% - 126px)}
+ .diag-row{gap:8px}
+ .diag-row select{width:120px;min-width:120px}
+ .inbox-header-actions{gap:5px}
+ #diagnosticLaunch{font-size:12px}
+}
