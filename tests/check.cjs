@@ -131,4 +131,20 @@ assert.ok(simpleCss.includes('body.crm-simple .board{display:none}'),'Fiches bou
 assert.ok(simpleCss.includes('body.crm-simple.simple-boutiques-open .board{display:block}'),'Boutiques affichables sur demande');
 assert.ok(read('task-inbox.js').includes("connect.hidden=connected"),'Connecter Google proposé lorsque non connecté');
 
+// M006 — antisèche téléphonique repliable et sauvegardée hors du GitHub public.
+const phoneGuide=[{q:'Est-ce gratuit ?',a:'Oui, pilote gratuit sans engagement.'},{q:'<Code?>',a:'Ne jamais inventer.'}];
+const cleanedGuide=api.clean('Actions',{id:'guide',prospectId:'p',status:'a_faire',callGuide:phoneGuide});
+assert.equal(cleanedGuide.callGuide.length,2,'Deux réponses persistées dans l’action privée');
+assert.deepEqual(JSON.parse(api.values('Actions',cleanedGuide)[7]).callGuide,phoneGuide,'Les réponses survivent au JSON Google Sheets');
+const maliciousGuide=api.clean('Actions',{callGuide:[{q:'<iframe>',a:'<script>alert(1)</script>'}]});
+const safeCard=inboxApi.card(maliciousGuide,new Map());
+assert.ok(safeCard.includes('Questions / réponses pendant l’appel'),'Antisèche accessible depuis la tâche');
+assert.ok(safeCard.includes('&lt;iframe&gt;'),'Question échappée');
+assert.ok(safeCard.includes('&lt;script&gt;'),'Réponse échappée');
+assert.ok(!safeCard.includes('<iframe>')&&!safeCard.includes('<script>'),'Aucune injection HTML');
+assert.ok(safeCard.includes('<details'),'Aide fermée par défaut');
+assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
+assert.ok(sw.includes('mailotion-crm-v16-m006-call-guide'),'Cache Android incrémenté');
+assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
+
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
