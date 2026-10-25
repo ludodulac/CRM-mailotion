@@ -86,7 +86,7 @@ const baseURL=()=> 'https://sheets.googleapis.com/v4/spreadsheets/'+encodeURICom
 const clean=(table,raw)=>{
  const obj=raw&&typeof raw==='object'?clone(raw):{};
  if(table==='Prospects')return api().sanitize(obj,obj.origin==='github'?'github':'local');
- if(table==='Actions')return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),date:val(obj.date,10),due:val(obj.due,10),type:val(obj.type,70),status:val(obj.status,35)||'a_faire',description:val(obj.description,2600),next:val(obj.next,800),channel:['whatsapp','email','telephone'].includes(obj.channel)?obj.channel:'',recipient:val(obj.recipient,240),message:val(obj.message,1800),completedAt:val(obj.completedAt,45),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
+ if(table==='Actions')return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),date:val(obj.date,10),due:val(obj.due,10),type:val(obj.type,70),status:val(obj.status,35)||'a_faire',description:val(obj.description,2600),next:val(obj.next,800),channel:['whatsapp','email','telephone'].includes(obj.channel)?obj.channel:'',recipient:val(obj.recipient,240),message:val(obj.message,1800),callGuide:Array.isArray(obj.callGuide)?obj.callGuide.slice(0,15).map(item=>({q:val(item?.q,170),a:val(item?.a,560)})).filter(item=>item.q&&item.a):[],completedAt:val(obj.completedAt,45),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
  return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),email:val(obj.email,240),status:knownEmailStatuses.has(obj.status)?obj.status:'trouve_non_teste',active:obj.active===true,verifiedAt:val(obj.verifiedAt,10),notes:val(obj.notes,2000),source:val(obj.source,450),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
 };
 function values(table,item){
@@ -287,7 +287,7 @@ function saveAction(e){
  e.preventDefault();const prospectId=$('aProspect').value,description=val($('aDescription').value,2600);
  if(!prospectId||!description){api().toast('Choisis une boutique et décris l’action.');return}
  const old=state.actions.find(x=>x.id===state.editingAction),stamp=new Date().toISOString();
- const a={id:old?.id||uid('action'),prospectId,date:validDate($('aDate').value),due:validDate($('aDue').value),type:$('aType').value,status:$('aStatus').value,description,next:val($('aNext').value,800),channel:$('aChannel').value,recipient:val($('aRecipient').value,240),message:val($('aMessage').value,1800),completedAt:old?.completedAt||'',createdAt:old?.createdAt||stamp,updatedAt:stamp};
+ const a={id:old?.id||uid('action'),prospectId,date:validDate($('aDate').value),due:validDate($('aDue').value),type:$('aType').value,status:$('aStatus').value,description,next:val($('aNext').value,800),channel:$('aChannel').value,recipient:val($('aRecipient').value,240),message:val($('aMessage').value,1800),callGuide:old?.callGuide||[],completedAt:old?.completedAt||'',createdAt:old?.createdAt||stamp,updatedAt:stamp};
  if(old)Object.assign(old,a);else state.actions.push(a);
  const rec=getProspect(prospectId);
  if(rec&&a.status==='terminee'){rec.lastAction=a.description;if(a.date&&['email_envoye','appel','reponse_recue','relance'].includes(a.type))rec.lastContact=a.date;rec.updatedAt=stamp;api().persist()}
