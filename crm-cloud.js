@@ -86,7 +86,7 @@ const baseURL=()=> 'https://sheets.googleapis.com/v4/spreadsheets/'+encodeURICom
 const clean=(table,raw)=>{
  const obj=raw&&typeof raw==='object'?clone(raw):{};
  if(table==='Prospects')return api().sanitize(obj,obj.origin==='github'?'github':'local');
- if(table==='Actions')return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),date:val(obj.date,10),due:val(obj.due,10),type:val(obj.type,70),status:val(obj.status,35)||'a_faire',description:val(obj.description,2600),next:val(obj.next,800),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
+ if(table==='Actions')return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),date:val(obj.date,10),due:val(obj.due,10),type:val(obj.type,70),status:val(obj.status,35)||'a_faire',description:val(obj.description,2600),next:val(obj.next,800),channel:['whatsapp','email','telephone'].includes(obj.channel)?obj.channel:'',recipient:val(obj.recipient,240),message:val(obj.message,1800),completedAt:val(obj.completedAt,45),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
  return {id:val(obj.id,130),prospectId:val(obj.prospectId,130),email:val(obj.email,240),status:knownEmailStatuses.has(obj.status)?obj.status:'trouve_non_teste',active:obj.active===true,verifiedAt:val(obj.verifiedAt,10),notes:val(obj.notes,2000),source:val(obj.source,450),updatedAt:val(obj.updatedAt,45),createdAt:val(obj.createdAt,45)};
 };
 function values(table,item){
@@ -267,6 +267,7 @@ function renderToday(){
  const offers=api().state.records.filter(x=>x.proposalSent&&x.stage!=='cliente'&&x.stage!=='sans_suite').map(x=>'<article class="today-card"><label><span><b>Proposition envoyée · '+esc(x.name)+'</b><p>'+esc(x.nextAction||'En attente de réponse')+'</p></span></label><div class="today-buttons"><button type="button" data-lead-edit="'+esc(x.id)+'">Ouvrir</button></div></article>').join('');
  $('todayList').innerHTML=all.map(actionForUI).join('')+follow+free+offers+fresh+
  (!all.length&&!follow&&!free&&!offers&&!fresh?'<p class="today-empty">Aucune tâche ni relance échue. Tu peux ajouter une tâche, ou vérifier les boutiques encore jamais contactées.</p>':'');
+ document.dispatchEvent(new Event('mailotion:tasks-changed'));
 }
 function selectOptions(selected=''){
  $('aProspect').innerHTML='<option value="">Choisir une boutique…</option>'+api().state.records.slice().sort((a,b)=>a.name.localeCompare(b.name,'fr')).map(x=>'<option value="'+esc(x.id)+'" '+(selected===x.id?'selected':'')+'>'+esc(x.name)+'</option>').join('');
@@ -279,13 +280,14 @@ function openAction(id=null,prospectId=''){
  $('aType').value=old?.type||'tache';$('aStatus').value=old?.status||'a_faire';
  $('aDate').value=old?.date||date();$('aDue').value=old?.due||'';
  $('aDescription').value=old?.description||'';$('aNext').value=old?.next||'';
+ $('aChannel').value=old?.channel||'';$('aRecipient').value=old?.recipient||'';$('aMessage').value=old?.message||'';
  showDialog('actionDialog');
 }
 function saveAction(e){
  e.preventDefault();const prospectId=$('aProspect').value,description=val($('aDescription').value,2600);
  if(!prospectId||!description){api().toast('Choisis une boutique et décris l’action.');return}
  const old=state.actions.find(x=>x.id===state.editingAction),stamp=new Date().toISOString();
- const a={id:old?.id||uid('action'),prospectId,date:validDate($('aDate').value),due:validDate($('aDue').value),type:$('aType').value,status:$('aStatus').value,description,next:val($('aNext').value,800),createdAt:old?.createdAt||stamp,updatedAt:stamp};
+ const a={id:old?.id||uid('action'),prospectId,date:validDate($('aDate').value),due:validDate($('aDue').value),type:$('aType').value,status:$('aStatus').value,description,next:val($('aNext').value,800),channel:$('aChannel').value,recipient:val($('aRecipient').value,240),message:val($('aMessage').value,1800),completedAt:old?.completedAt||'',createdAt:old?.createdAt||stamp,updatedAt:stamp};
  if(old)Object.assign(old,a);else state.actions.push(a);
  const rec=getProspect(prospectId);
  if(rec&&a.status==='terminee'){rec.lastAction=a.description;if(a.date&&['email_envoye','appel','reponse_recue','relance'].includes(a.type))rec.lastContact=a.date;rec.updatedAt=stamp;api().persist()}
@@ -293,9 +295,16 @@ function saveAction(e){
 }
 function completeAction(id){
  const a=state.actions.find(x=>x.id===id);if(!a)return;
- a.status='terminee';a.updatedAt=new Date().toISOString();saveLocal();
- const r=getProspect(a.prospectId);if(r){r.lastAction=a.description;if(a.date&&['email_envoye','appel','reponse_recue','relance'].includes(a.type))r.lastContact=a.date;if(a.type==='relance'&&r.followup===a.due)r.followup='';r.updatedAt=a.updatedAt;api().persist()}
+ a.status='terminee';a.updatedAt=new Date().toISOString();a.completedAt=a.updatedAt;
+ if(['email_envoye','appel','relance'].includes(a.type))a.date=date();
+ saveLocal();
+ const r=getProspect(a.prospectId);if(r){r.lastAction=a.description;if(['email_envoye','appel','reponse_recue','relance'].includes(a.type))r.lastContact=date();if(a.type==='relance'&&r.followup===a.due)r.followup='';r.updatedAt=a.updatedAt;api().persist()}
  renderToday();scheduleCloud();api().toast('Action terminée, retirée de la liste À faire.');
+}
+function markTaskDone(id){
+ const a=state.actions.find(x=>x.id===id);if(!a||done(a))return false;
+ if(a.message&&['whatsapp','email'].includes(a.channel)&&!confirm('As-tu vraiment envoyé le message ?\n\nCocher Fait enregistre uniquement une action déjà réalisée.'))return false;
+ completeAction(id);return true;
 }
 function postponeAction(id){
  const a=state.actions.find(x=>x.id===id);if(!a)return;
@@ -447,7 +456,7 @@ function init(){
  snapshot();addUIEvents();renderToday();
  if(state.client&&state.sheet)showCloud('Connexion privée configurée, appuie sur « Connecter Google » pour synchroniser.');
  else showCloud('Non connectée. Tes fiches actuelles restent sur ce téléphone, sans suppression.');
- window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails),recordOutreachSent};
+ window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails),markTaskDone,editTask:openAction,refreshTasks:renderToday,recordOutreachSent};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

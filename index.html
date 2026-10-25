@@ -19,6 +19,10 @@
   </div>
 </header>
 <main class="container">
+ <section class="task-inbox" id="taskInbox" aria-labelledby="taskInboxTitle">
+   <div class="task-inbox-head"><h2 id="taskInboxTitle">À faire <span id="taskInboxCount"></span></h2><button type="button" id="taskInboxRefresh" class="task-inbox-refresh">↻ Actualiser</button></div>
+   <div id="taskInboxList" class="task-inbox-list" aria-live="polite"><p>Chargement…</p></div>
+ </section>
  <section class="stats" aria-label="Résumé des contacts">
    <button class="stat" data-summary="all" type="button"><span class="stat-name">Boutiques</span><strong id="totalCount">0</strong><span class="stat-sub">dans mon carnet</span></button>
    <button class="stat" data-summary="todo" type="button"><span class="stat-name">À contacter</span><strong id="todoCount">0</strong><span class="stat-sub">pour prendre contact</span></button>
@@ -162,9 +166,12 @@ Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textar
  <div class="field"><label for="aDue">Échéance / relance</label><input type="date" id="aDue"></div>
  <div class="field span2"><label for="aDescription">Description</label><textarea id="aDescription" maxlength="2600" required placeholder="Ex. Préparer l'audit d'emails de bienvenue…"></textarea></div>
  <div class="field span2"><label for="aNext">Étape suivante (facultatif)</label><input id="aNext" maxlength="800" placeholder="Ex. Relancer le 20 octobre"></div>
+ <div class="field"><label for="aChannel">Canal</label><select id="aChannel"><option value="">Autre</option><option value="whatsapp">WhatsApp</option><option value="email">Email</option><option value="telephone">Téléphone</option></select></div>
+ <div class="field"><label for="aRecipient">Destinataire</label><input id="aRecipient" maxlength="240" placeholder="Numéro ou email"></div>
+ <div class="field span2"><label for="aMessage">Message à copier (facultatif)</label><textarea id="aMessage" maxlength="1800" rows="5" placeholder="Texte à envoyer toi-même"></textarea></div>
  </div></div><div class="dialog-actions"><button type="button" class="button button-secondary" data-close-cloud="actionDialog">Annuler</button><button type="submit" class="button button-primary">Enregistrer</button></div></form></dialog>
  <dialog class="dialog" id="timelineDialog"><div class="dialog-head"><div><p class="eyebrow accent">CHRONOLOGIE</p><h2 id="timelineTitle">Historique</h2></div><button type="button" class="close-btn" data-close-cloud="timelineDialog">×</button></div><div class="dialog-scroll"><div id="timelineBody"></div></div><div class="dialog-actions"><button id="timelineAdd" type="button" class="button button-primary">＋ Ajouter une action</button></div></dialog>
  <dialog class="dialog" id="emailDialog"><div class="dialog-head"><div><p class="eyebrow accent">SUIVI DES ADRESSES</p><h2 id="emailTitle">Historique des emails</h2></div><button type="button" class="close-btn" data-close-cloud="emailDialog">×</button></div><div class="dialog-scroll"><div id="emailList"></div><form id="emailForm" class="form-grid"><div class="field span2"><label for="eValue">Email professionnel</label><input type="email" id="eValue" required></div><div class="field"><label for="eStatus">Statut</label><select id="eStatus"><option value="trouve_non_teste">Trouvé, non testé</option><option value="confirme">Fonctionnel confirmé</option><option value="invalide">Invalide</option><option value="alternatif_a_tester">Alternatif à tester</option></select></div><div class="field"><label for="eVerified">Vérifié le</label><input type="date" id="eVerified"></div><div class="field span2"><label for="eNotes">Observations</label><textarea id="eNotes" maxlength="2000"></textarea></div><div class="field span2"><button class="button button-primary" type="submit">＋ Enregistrer cette adresse</button></div></form></div></dialog>
  <div id="toast" role="status" aria-live="polite" class="toast"></div>
-<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script><script src="./simple.js" defer></script>
+<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script><script src="./simple.js" defer></script><script src="./task-inbox.js" defer></script>
 </body></html>

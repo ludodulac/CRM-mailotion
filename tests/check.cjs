@@ -24,7 +24,7 @@ for(const [,id] of [...app.matchAll(/\$\('([^']+)'\)/g),...cloud.matchAll(/\$\('
 const publicData=JSON.parse(read('prospects.json'));
 assert.equal(publicData.boutiques.length,11,'Les 11 prospects publics initiaux sont conservés');
 for(const b of publicData.boutiques){assert.equal(b.notes,undefined,'Pas de notes privées dans GitHub');assert.equal(b.contact_statut,undefined,'Pas de statut privé dans GitHub');}
-const replaced=cloud.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/, 'return {mergeRecord,deduplicate,values,fp};\n})();');
+const replaced=cloud.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/, 'return {mergeRecord,deduplicate,values,fp,clean};\n})();');
 assert.notEqual(replaced,cloud,'Test extraction fonctions cloud');
 const store={};
 const env={localStorage:{getItem:k=>store[k]||null,setItem:(k,v)=>store[k]=v},window:{MailotionCRM:{sanitize:r=>r}}};
@@ -94,5 +94,30 @@ assert.equal(custom.subject,'Objet validé','Le sujet privé prévaut sur le mod
 assert.equal(custom.body,'Message validé par l’utilisateur','Le texte privé prévaut sur le modèle');
 assert.equal(funcs.values({website:'https://exemple-inconnu.fr'}).body,'',
  'Ne jamais inventer le contenu d’un brouillon sans modèle');
+
+// M005 — l'accueil doit montrer les actions réelles, leur destinataire et le message à copier.
+const inbox=read('task-inbox.js');
+new Function(inbox);
+for(const id of ['taskInbox','taskInboxCount','taskInboxList','taskInboxRefresh','aChannel','aRecipient','aMessage'])
+ assert.ok(ids.includes(id),'Composant tâches présent : '+id);
+assert.ok(sw.includes('task-inbox.js'),'Le cache mobile contient la liste des tâches');
+assert.ok(html.includes('src="./task-inbox.js"'),'Le module tâches est chargé sur mobile');
+assert.ok(html.indexOf('id="taskInbox"')<html.indexOf('class="stats"'),'À faire est avant les statistiques');
+assert.ok(cloud.includes('markTaskDone')&&cloud.includes('completedAt'),'Une confirmation précède la clôture');
+const actionForm=api.clean('Actions',{id:'x',prospectId:'p',type:'relance',status:'a_faire',channel:'whatsapp',recipient:'+33 6 00 00 00 00',message:'Bonjour <Thomas>'});
+assert.equal(actionForm.channel,'whatsapp');
+assert.equal(actionForm.recipient,'+33 6 00 00 00 00');
+assert.equal(actionForm.message,'Bonjour <Thomas>');
+assert.equal(api.values('Actions',actionForm).length,8,'Schéma Sheets 8 colonnes inchangé');
+assert.ok(JSON.parse(api.values('Actions',actionForm)[7]).message.includes('<Thomas>'),'Message conservé dans le JSON privé');
+const inboxExtract=inbox.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/,
+ 'return {active,recipient,link,card};\n})();');
+assert.notEqual(inboxExtract,inbox,'Les fonctions de tâches sont testables');
+const inboxApi=vm.runInNewContext(inboxExtract,{window:{},document:{},navigator:{},URL,Date});
+const exampleCard=inboxApi.card(actionForm,new Map([['p',{name:'Prospect fictif'}]]));
+assert.ok(exampleCard.includes('Bonjour &lt;Thomas&gt;'),'Le message est échappé dans le HTML');
+assert.ok(exampleCard.includes('Copier le message')&&exampleCard.includes('data-inbox-done'),'Copie et validation manuelle');
+assert.ok(inboxApi.link(actionForm,'+33 6 00 00 00 00').startsWith('https://wa.me/'),'WhatsApp est ouvert sans envoyer');
+assert.equal(inboxApi.active({...actionForm,status:'terminee'}),false,'Une tâche terminée disparaît');
 
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
