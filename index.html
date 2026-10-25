@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#25113e"><meta name="description" content="CRM Mailotion : une application simple pour contacter les boutiques, offrir un audit gratuit et suivre les clientes.">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="CRM Mailotion">
 <link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest">
-<link rel="stylesheet" href="./style.css"><title>CRM Mailotion — Mes boutiques</title>
+<link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./simple.css"><title>CRM Mailotion — Mes boutiques</title>
 </head>
 <body>
 <header class="top">
@@ -14,8 +14,8 @@
       <div class="brand"><span class="brand-icon" aria-hidden="true">✦</span><span>mailotion<span class="brand-dot">.</span></span><span class="brand-tag">CRM</span></div>
       <span class="privacy-badge" title="Les notes et le suivi restent sur cet appareil">● Données locales</span>
     </div>
-    <div class="hero"><div><p class="eyebrow">MON ESPACE PROSPECTION</p><h1>Mes boutiques<span class="heading-dot">.</span></h1><p class="hero-sub">Des contacts bien rangés. Une aide gratuite pour commencer. Et un suivi simple quand une boutique devient cliente.</p></div>
-    <button type="button" class="button button-white hero-add" id="addTop">＋ Nouvelle boutique</button></div>
+    <div class="hero"><div><p class="eyebrow">MON ESPACE PROSPECTION</p><h1>Mes boutiques<span class="heading-dot">.</span></h1><p class="hero-sub">Tes boutiques, tes priorités et les prochaines actions. ChatGPT prépare ; tu décides.</p></div>
+    <button type="button" class="button button-white hero-add" id="addTop">＋ Boutique</button><button type="button" class="button mode-toggle" id="modeToggle" aria-pressed="false">⚙ Mode complet</button></div>
   </div>
 </header>
 <main class="container">
@@ -166,5 +166,5 @@ Ma boutique;Brest;bonjour@exemple.fr;02 98 00 00 00;https://exemple.fr'></textar
  <dialog class="dialog" id="timelineDialog"><div class="dialog-head"><div><p class="eyebrow accent">CHRONOLOGIE</p><h2 id="timelineTitle">Historique</h2></div><button type="button" class="close-btn" data-close-cloud="timelineDialog">×</button></div><div class="dialog-scroll"><div id="timelineBody"></div></div><div class="dialog-actions"><button id="timelineAdd" type="button" class="button button-primary">＋ Ajouter une action</button></div></dialog>
  <dialog class="dialog" id="emailDialog"><div class="dialog-head"><div><p class="eyebrow accent">SUIVI DES ADRESSES</p><h2 id="emailTitle">Historique des emails</h2></div><button type="button" class="close-btn" data-close-cloud="emailDialog">×</button></div><div class="dialog-scroll"><div id="emailList"></div><form id="emailForm" class="form-grid"><div class="field span2"><label for="eValue">Email professionnel</label><input type="email" id="eValue" required></div><div class="field"><label for="eStatus">Statut</label><select id="eStatus"><option value="trouve_non_teste">Trouvé, non testé</option><option value="confirme">Fonctionnel confirmé</option><option value="invalide">Invalide</option><option value="alternatif_a_tester">Alternatif à tester</option></select></div><div class="field"><label for="eVerified">Vérifié le</label><input type="date" id="eVerified"></div><div class="field span2"><label for="eNotes">Observations</label><textarea id="eNotes" maxlength="2000"></textarea></div><div class="field span2"><button class="button button-primary" type="submit">＋ Enregistrer cette adresse</button></div></form></div></dialog>
  <div id="toast" role="status" aria-live="polite" class="toast"></div>
-<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script>
+<script src="./app.js" defer></script><script src="./crm-cloud.js" defer></script><script src="./outreach.js" defer></script><script src="./simple.js" defer></script>
 </body></html>
