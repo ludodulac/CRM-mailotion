@@ -5,6 +5,20 @@ const read=name=>fs.readFileSync(name,'utf8');
 const html=read('index.html'),app=read('app.js'),cloud=read('crm-cloud.js');
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 assert.equal(ids.length,new Set(ids).size,'IDs HTML uniques');
+// M003 — simplification d'interface non destructive, reversible sur telephone.
+assert.ok(html.includes('id="modeToggle"')&&html.includes('src="./simple.js"'));
+assert.ok(html.includes('href="./simple.css"'));
+const simpleJs=read('simple.js'),simpleCss=read('simple.css');
+new Function(simpleJs);
+assert.ok(simpleJs.includes('mailotion-crm-display-v1')&&simpleJs.includes('crm-simple'));
+assert.ok(simpleJs.includes('fEmailStatus')&&simpleJs.includes('fPaidOffer'),
+ 'Les champs anciens restent presents meme s\'ils sont masques');
+assert.ok(simpleCss.includes('.outreach-panel')&&simpleCss.includes('.stat[data-summary="free"]'));
+for(const id of ['cloudConnect','fName','fEmail','fPhone','fStage','fNotes','outreachConfirm','backupBtn','restoreBtn','modeToggle'])
+ assert.ok(ids.includes(id),'Composant obligatoire conserve : '+id);
+assert.ok(read('sw.js').includes('simple.js')&&read('sw.js').includes('simple.css'),
+ 'Le cache PWA contient le mode simple');
+
 for(const name of ['app.js','crm-cloud.js','outreach.js','sw.js'])new Function(read(name));
 for(const [,id] of [...app.matchAll(/\$\('([^']+)'\)/g),...cloud.matchAll(/\$\('([^']+)'\)/g)])assert.ok(ids.includes(id),'Champ '+id+' existe dans HTML');
 const publicData=JSON.parse(read('prospects.json'));
