@@ -95,3 +95,24 @@ body.crm-simple .hero{padding-top:13px}
  .inbox-task-actions button:last-child{margin-left:0}
  .inbox-check{padding:8px}
 }
+
+/* Mode simple = écran de travail. Les fiches détaillées restent accessibles sur demande. */
+.simple-boutiques-toggle{display:none}
+body.crm-simple .hero h1{display:none}
+body.crm-simple .board{display:none}
+body.crm-simple.simple-boutiques-open .board{display:block}
+body.crm-simple .simple-boutiques-toggle{display:block;width:100%;border:1px solid #e6def0;background:#fff;color:#5b3d99;border-radius:12px;padding:12px 16px;min-height:46px;font-size:14px;font-weight:800;text-align:center;margin:0 0 12px}
+.inbox-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+#inboxConnect{min-height:39px;padding:9px 12px;font-size:12px}
+body.crm-simple .task-inbox{margin-bottom:12px}
+body.crm-simple .hero{gap:8px;padding-top:10px}
+body.crm-simple .top{padding-bottom:40px}
+body.crm-simple .topline{margin-bottom:7px}
+@media(max-width:590px){
+ body.crm-simple .hero{flex-direction:row;justify-content:flex-start;gap:9px;align-items:center}
+ body.crm-simple .hero-add,body.crm-simple .mode-toggle{width:auto;min-height:39px;flex:0 1 auto}
+ body.crm-simple main.container{margin-top:-16px}
+ .task-inbox-head{flex-wrap:wrap;align-items:center;gap:8px}
+ .inbox-header-actions{margin-left:auto}
+ .inbox-task-actions a,.inbox-task-actions button{white-space:normal}
+}
