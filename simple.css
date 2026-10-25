@@ -50,3 +50,6 @@ body.crm-simple .privacy-badge{font-size:9px;padding:6px}
 body.crm-simple .today-panel{padding:12px}
 body.crm-simple .board{padding:12px}
 }
+/* Les suppressions restent dans le mode complet uniquement. */
+body.crm-simple #deleteBtn{display:none!important}
+body:not(.crm-simple) .crm-advanced-toggle{display:none!important}
