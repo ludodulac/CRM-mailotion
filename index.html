@@ -20,7 +20,7 @@
 </header>
 <main class="container">
  <section class="task-inbox" id="taskInbox" aria-labelledby="taskInboxTitle">
-   <div class="task-inbox-head"><h2 id="taskInboxTitle">À faire <span id="taskInboxCount"></span></h2><button type="button" id="taskInboxRefresh" class="task-inbox-refresh">↻ Actualiser</button></div>
+   <div class="task-inbox-head"><h2 id="taskInboxTitle">À faire <span id="taskInboxCount"></span></h2><div class="inbox-header-actions"><button type="button" id="inboxConnect" class="button button-primary" hidden>Connecter Google</button><button type="button" id="taskInboxRefresh" class="task-inbox-refresh">↻ Actualiser</button></div></div>
    <div id="taskInboxList" class="task-inbox-list" aria-live="polite"><p>Chargement…</p></div>
  </section>
  <section class="stats" aria-label="Résumé des contacts">
@@ -83,7 +83,8 @@
  <div class="cloud-settings" id="cloudSettings" hidden><div class="field"><label for="cloudClientId">Identifiant OAuth Google (non secret)</label><input id="cloudClientId" type="text" autocomplete="off" placeholder="…apps.googleusercontent.com"></div><div class="field"><label for="cloudSheetId">Identifiant du tableau privé Google Sheets</label><input id="cloudSheetId" type="text" autocomplete="off" placeholder="Identifiant de la feuille privée"></div><div class="cloud-actions"><button type="button" class="button button-secondary" id="cloudSaveSettings">Enregistrer la configuration</button><button type="button" class="button button-secondary" id="cloudRecoveryBtn">📦 Sauvegarde avant migration</button><button type="button" class="button button-secondary" id="cloudConflictsBtn">⚠ Copies de conflits</button><a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener noreferrer">Créer l'identifiant OAuth ↗</a></div></div>
  <p class="cloud-note">Les notes et historiques ne partent jamais vers GitHub. Connexion Google autorisée uniquement sur ton compte ; aucun mot de passe ou jeton enregistré dans le dépôt.</p>
  </section>
- <section class="board">
+ <button id="simpleBoutiquesToggle" class="simple-boutiques-toggle" type="button" aria-expanded="false" aria-controls="leadBoard">Voir les boutiques ↓</button>
+ <section class="board" id="leadBoard">
   <div class="section-heading"><div><p class="eyebrow accent">CARNET D'ADRESSES</p><h2>Suivi des boutiques</h2></div><div class="sync-status" id="syncStatus">○ Prêt</div></div>
   <div class="controls">
     <label class="searchbox"><span aria-hidden="true">⌕</span><input type="search" id="search" autocomplete="off" placeholder="Rechercher une boutique, une ville, un mail…" aria-label="Rechercher une boutique"></label>
