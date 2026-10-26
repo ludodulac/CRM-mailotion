@@ -31,8 +31,25 @@ function link(a,to){
  }
  return '';
 }
+function boutiqueLink(a,p){
+ // URL publique de la fiche boutique, jamais déduite d'une adresse email.
+ // Si le site est absent mais que la tâche pointe déjà vers ce site,
+ // ce lien connu sert de repli. Aucun domaine n'est inventé.
+ const candidates=[p?.website,p?.newsletterUrl,
+  ['newsletter','site'].includes(a.channel)?a.recipient:''];
+ for(const candidate of candidates){
+  const raw=String(candidate||'').trim();
+  if(!raw||(/^[a-z][a-z0-9+.-]*:/i.test(raw)&&!/^https?:\/\//i.test(raw)))continue;
+  try{
+   const u=new URL(/^https?:\/\//i.test(raw)?raw:'https://'+raw);
+   if(['https:','http:'].includes(u.protocol)&&u.hostname.includes('.')&&!u.username&&!u.password)
+    return u.href;
+  }catch{}
+ }
+ return '';
+}
 function card(a,lookup){
- const p=lookup.get(a.prospectId),to=recipient(a,p),url=link(a,to);
+ const p=lookup.get(a.prospectId),to=recipient(a,p),url=link(a,to),site=boutiqueLink(a,p);
  const message=String(a.message||'');
  const qa=Array.isArray(a.callGuide)?a.callGuide.slice(0,15).filter(x=>x?.q&&x?.a):[];
  const aide=qa.length?'<details class="inbox-qa"><summary>❓ Questions / réponses pendant l’appel</summary>'+
@@ -45,6 +62,7 @@ function card(a,lookup){
    '<div class="inbox-task-head"><div><div class="inbox-target">'+esc(target)+'</div><h3>'+esc(taskTitle)+'</h3></div>'+
    '<label class="inbox-check"><input type="checkbox" data-inbox-done="'+esc(a.id)+'" aria-label="J’ai fait cette tâche"><span>Fait</span></label></div>'+
    (meta.length?'<div class="inbox-meta">'+meta.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div>':'')+
+   (site?'<p class="inbox-site-link"><a href="'+esc(site)+'" target="_blank" rel="noopener noreferrer">🌐 Voir la boutique ↗</a></p>':'<p class="inbox-site-missing">🌐 Site de la boutique à renseigner dans sa fiche</p>')+
    (message?'<div class="inbox-message">'+esc(message)+'</div>':'')+
    aide+
    '<div class="inbox-task-actions">'+
