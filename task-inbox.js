@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;',"'":'&#39;'}[c]));
 const localDate=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const active=a=>a&&a.status!=='terminee'&&a.status!=='annulee';
-const channelName=c=>({whatsapp:'WhatsApp',email:'Email',telephone:'Téléphone'}[c]||'');
+const channelName=c=>({whatsapp:'WhatsApp',email:'Email',telephone:'Téléphone',newsletter:'Newsletter',site:'Site'}[c]||'');
 const dayLabel=v=>{if(!/^\d{4}-\d\d-\d\d$/.test(v||''))return '';if(v<localDate())return 'En retard';if(v===localDate())return "Aujourd'hui";const d=new Date(v+'T12:00:00');return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})};
 function recipient(a,p){
  const explicit=String(a.recipient||'').trim();
@@ -26,6 +26,9 @@ function link(a,to){
   const n=to.replace(/[^\d+]/g,'');
   return n.replace(/\D/g,'').length>=9?'tel:'+n:'';
  }
+ if(a.channel==='newsletter'||a.channel==='site'){
+  try {const u=new URL(to);return u.protocol==='https:'?u.href:''}catch{return ''}
+ }
  return '';
 }
 function card(a,lookup){
@@ -37,7 +40,7 @@ function card(a,lookup){
  const date=dayLabel(a.due||'');
  const target=(p?.name||'Boutique')+(p?.contact?' · '+p.contact:'');
  const taskTitle=String(a.description||'Tâche').split('\n')[0].slice(0,160);
- const meta=[channelName(a.channel),to,date].filter(Boolean);
+ const meta=[channelName(a.channel),(['newsletter','site'].includes(a.channel)?'':to),date].filter(Boolean);
  return '<article class="inbox-task">'+
    '<div class="inbox-task-head"><div><div class="inbox-target">'+esc(target)+'</div><h3>'+esc(taskTitle)+'</h3></div>'+
    '<label class="inbox-check"><input type="checkbox" data-inbox-done="'+esc(a.id)+'" aria-label="J’ai fait cette tâche"><span>Fait</span></label></div>'+
@@ -46,10 +49,11 @@ function card(a,lookup){
    aide+
    '<div class="inbox-task-actions">'+
    (message?'<button type="button" data-inbox-copy="'+esc(a.id)+'">📋 Copier le message</button>':'')+
-   (url?'<a href="'+esc(url)+'" target="'+(a.channel==='telephone'?'_self':'_blank')+'" rel="noopener noreferrer">'+esc(a.channel==='whatsapp'?'Ouvrir WhatsApp':a.channel==='email'?'Écrire':"Appeler")+' ↗</a>':'')+
+   (url?'<a href="'+esc(url)+'" target="'+(a.channel==='telephone'?'_self':'_blank')+'" rel="noopener noreferrer">'+esc(a.channel==='whatsapp'?'Ouvrir WhatsApp':a.channel==='email'?'Écrire':a.channel==='newsletter'?'S’inscrire':a.channel==='site'?'Voir le site':"Appeler")+' ↗</a>':'')+
    (a.channel==='telephone'?'<button type="button" data-diag-prospect="'+esc(a.prospectId)+'">☑ Questions à cocher</button>':'')+
    '<button type="button" data-inbox-edit="'+esc(a.id)+'">Modifier</button></div></article>';
 }
+let expanded=false;
 function render(){
  const host=$('taskInboxList');if(!host)return;
  const leads=new Map((window.MailotionCRM?.state?.records||[]).map(p=>[p.id,p]));
@@ -59,13 +63,13 @@ function render(){
   return da.localeCompare(db)||(a.createdAt||'').localeCompare(b.createdAt||'');
  });
  const count=$('taskInboxCount');if(count)count.textContent=String(todo.length);
- const shown=todo.slice(0,8);
+ const shown=expanded?todo:todo.slice(0,8);
  const connected=cloud?.status?.().connected===true;
  const connect=$('inboxConnect');if(connect)connect.hidden=connected;
  const note=!connected?'<div class="inbox-sync-hint">↻ Connecte Google pour retrouver les tâches enregistrées par ChatGPT.</div>':'';
  host.innerHTML=note+(shown.length?shown.map(a=>card(a,leads)).join(''):
  '<div class="inbox-empty">'+(connected?'✓ Rien à faire pour le moment.':'Tes tâches apparaîtront ici après synchronisation.')+'</div>')+
- (todo.length>8?'<p class="inbox-more">+'+(todo.length-8)+' autres tâches : ouvre le mode complet.</p>':'');
+ (todo.length>8?'<button type="button" class="inbox-more" data-inbox-expand="1">'+(expanded?'Réduire la liste':'Voir toutes les tâches ('+todo.length+')')+'</button>':'');
 }
 async function copyText(s){
  if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(s);return true}catch{}}
@@ -77,6 +81,7 @@ function init(){
  $('inboxConnect')?.addEventListener('click',()=>document.getElementById('cloudConnect')?.click());
  $('taskInboxList')?.addEventListener('click',async event=>{
   const b=event.target.closest('button');if(!b)return;
+  if(b.dataset.inboxExpand){expanded=!expanded;render();return}
   if(b.dataset.inboxCopy){
    const a=window.MailotionCloud?.getActions?.().find(x=>x.id===b.dataset.inboxCopy);
    if(a?.message){const ok=await copyText(a.message);window.MailotionCRM?.toast?.(ok?'✓ Message copié.':'Copie impossible : sélectionne le texte dans la carte.')}

@@ -144,7 +144,7 @@ assert.ok(safeCard.includes('&lt;script&gt;'),'Réponse échappée');
 assert.ok(!safeCard.includes('<iframe>')&&!safeCard.includes('<script>'),'Aucune injection HTML');
 assert.ok(safeCard.includes('<details'),'Aide fermée par défaut');
 assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
-assert.ok(sw.includes('mailotion-crm-v17-m007-diagnostic'),'Cache Android incrémenté et valide');
+assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Cache Android incrémenté et valide');
 assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
 
 // M007 — questions par boutique, données privées, non supposées à l'avance.
@@ -154,7 +154,7 @@ for(const id of ['diagnosticLaunch','diagnosticDialog','diagnosticProspect','dia
  assert.ok(ids.includes(id),'Élément diagnostic présent : '+id);
 assert.ok(html.includes('src="./diagnostic.js"'),'Nouvel écran diagnostique chargé');
 assert.ok(sw.includes("'./diagnostic.js'"),'Diagnostic préchargé pour usage hors ligne');
-assert.ok(sw.includes('mailotion-crm-v17-m007-diagnostic'),'Le cache PWA mobile est renouvelé');
+assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Le cache PWA mobile est renouvelé');
 assert.ok(app.includes('data-diagnostic-prospect'),'Accès depuis chaque fiche boutique');
 assert.ok(inbox.includes('data-diag-prospect'),'Accès depuis la tâche téléphonique');
 assert.ok(cloud.includes('saveDiagnostic')&&cloud.includes('getDiagnostic'),'Accès aux enregistrements privés');
@@ -177,5 +177,27 @@ assert.ok(diag.includes("selected===v?'selected':''"),'Valeurs sauvegardées rem
 assert.ok(diag.includes('À vérifier'),'Une absence de réponse ne veut pas dire Non');
 assert.ok(diag.includes('Pas utile'),'Une question peut être sans objet pour cette boutique');
 assert.ok(diag.includes('Une boîte à idées')===false,'Les consignes restent dans le HTML et non dans le code');
+
+
+/* M008 — inscription newsletter : lien https cliquable sans action déclenchée par le CRM. */
+const newsletterAction=api.clean('Actions',{
+ id:'newsletter-test',prospectId:'p',type:'tache',status:'a_faire',channel:'newsletter',
+ recipient:'https://ulul-couture.fr/#:~:text=Inscris-toi',description:'S’inscrire à la newsletter'
+});
+assert.equal(newsletterAction.channel,'newsletter','Canal newsletter conservé après clean/synchro');
+assert.equal(api.values('Actions',newsletterAction).length,8,'Schéma Google Sheets inchangé');
+assert.equal(JSON.parse(api.values('Actions',newsletterAction)[7]).recipient,newsletterAction.recipient);
+assert.equal(inboxApi.link(newsletterAction,newsletterAction.recipient),newsletterAction.recipient,'HTTPS autorisé');
+assert.equal(inboxApi.link(newsletterAction,'javascript:alert(1)'),'', 'Schéma dangereux refusé');
+assert.equal(inboxApi.link(newsletterAction,'http://ulul-couture.fr/'),'', 'HTTP refusé');
+const newsletterCard=inboxApi.card(newsletterAction,new Map([['p',{name:'ULUL Couture'}]]));
+assert.ok(newsletterCard.includes('S’inscrire ↗'),'Bouton direct accessible');
+assert.ok(newsletterCard.includes('https://ulul-couture.fr/'),'Destination présente');
+assert.ok(!newsletterCard.includes('>https://ulul-couture.fr'),'URL non encombrante');
+const unknownSignup=api.clean('Actions',{id:'website',prospectId:'p',channel:'site',recipient:'https://example.com'});
+assert.ok(inboxApi.card(unknownSignup,new Map()).includes('Voir le site ↗'),'Formulaire non confirmé : étiquette distincte');
+assert.ok(inbox.includes('data-inbox-expand'),'Bouton Voir toutes les tâches présent');
+assert.ok(html.includes('value="newsletter"')&&html.includes('value="site"'),'Canaux accessibles dans le formulaire');
+assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Cache PWA mobile renouvelé');
 
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
