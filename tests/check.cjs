@@ -22,7 +22,27 @@ assert.ok(read('sw.js').includes('simple.js')&&read('sw.js').includes('simple.cs
 for(const name of ['app.js','crm-cloud.js','outreach.js','sw.js'])new Function(read(name));
 for(const [,id] of [...app.matchAll(/\$\('([^']+)'\)/g),...cloud.matchAll(/\$\('([^']+)'\)/g)])assert.ok(ids.includes(id),'Champ '+id+' existe dans HTML');
 const publicData=JSON.parse(read('prospects.json'));
-assert.equal(publicData.boutiques.length,11,'Les 11 prospects publics initiaux sont conservés');
+assert.equal(publicData.boutiques.length,32,'Les 11 anciens + 21 nouveaux prospects publics sont disponibles');
+assert.equal(publicData.boutiques.filter(x=>x.campagne_appel==='savonneries-2026-10').length,21,
+ 'Les 21 savonneries sont publiées pour le mode sans connexion');
+const newCallIds=publicData.boutiques.filter(x=>x.campagne_appel==='savonneries-2026-10');
+assert.equal(new Set(newCallIds.map(x=>x.id)).size,21,'Aucun doublon d’entreprise');
+for(const x of newCallIds){
+ assert.match(x.telephone,/^(06|07)\s/,'Téléphone professionnel mobile fourni');
+ assert.ok(x.site.startsWith('https://')&&x.source_url.startsWith('https://'),
+ 'Site et source publics vérifiables');
+ assert.ok(!('notes' in x)&&!('stage' in x)&&!('lastContact' in x)&&!('callGuide' in x)&&!('email' in x),
+ 'Aucune donnée privée ni statut diffusé dans le dépôt public');
+}
+assert.ok(app.includes('callCampaign:txt')&&app.includes('callAngle:txt'),
+ 'La campagne n’est pas perdue durant l’import public');
+assert.ok(cloud.includes("seedPublicCallTasks()"),'Tâches d’appels créées en local');
+assert.ok(cloud.includes("call-20261026-"),'Identifiant public identique au Sheets privé');
+assert.ok(cloud.includes("['Prospects!A2:G','Actions!A2:H','Emails!A2:G']"),
+ 'Synchronisation privée sans dépassement de la taille du classeur');
+assert.ok(cloud.includes("const seeded=seedPublicCallTasks();"),
+ 'Nouvelles boutiques génèrent bien des tâches lorsqu’elles arrivent');
+
 for(const b of publicData.boutiques){assert.equal(b.notes,undefined,'Pas de notes privées dans GitHub');assert.equal(b.contact_statut,undefined,'Pas de statut privé dans GitHub');}
 const replaced=cloud.replace(/if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',init,\{once:true\}\);else init\(\);\n\}\)\(\);/, 'return {mergeRecord,deduplicate,values,fp,clean};\n})();');
 assert.notEqual(replaced,cloud,'Test extraction fonctions cloud');
