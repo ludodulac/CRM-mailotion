@@ -164,7 +164,7 @@ assert.ok(safeCard.includes('&lt;script&gt;'),'Réponse échappée');
 assert.ok(!safeCard.includes('<iframe>')&&!safeCard.includes('<script>'),'Aucune injection HTML');
 assert.ok(safeCard.includes('<details'),'Aide fermée par défaut');
 assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
-assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Cache Android incrémenté et valide');
+assert.ok(sw.includes('mailotion-crm-v21-m011-visible-calls'),'Cache Android incrémenté et valide');
 assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
 
 // M007 — questions par boutique, données privées, non supposées à l'avance.
@@ -174,7 +174,7 @@ for(const id of ['diagnosticLaunch','diagnosticDialog','diagnosticProspect','dia
  assert.ok(ids.includes(id),'Élément diagnostic présent : '+id);
 assert.ok(html.includes('src="./diagnostic.js"'),'Nouvel écran diagnostique chargé');
 assert.ok(sw.includes("'./diagnostic.js'"),'Diagnostic préchargé pour usage hors ligne');
-assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Le cache PWA mobile est renouvelé');
+assert.ok(sw.includes('mailotion-crm-v21-m011-visible-calls'),'Le cache PWA mobile est renouvelé');
 assert.ok(app.includes('data-diagnostic-prospect'),'Accès depuis chaque fiche boutique');
 assert.ok(inbox.includes('data-diag-prospect'),'Accès depuis la tâche téléphonique');
 assert.ok(cloud.includes('saveDiagnostic')&&cloud.includes('getDiagnostic'),'Accès aux enregistrements privés');
@@ -218,7 +218,7 @@ const unknownSignup=api.clean('Actions',{id:'website',prospectId:'p',channel:'si
 assert.ok(inboxApi.card(unknownSignup,new Map()).includes('Voir le site ↗'),'Formulaire non confirmé : étiquette distincte');
 assert.ok(inbox.includes('data-inbox-expand'),'Bouton Voir toutes les tâches présent');
 assert.ok(html.includes('value="newsletter"')&&html.includes('value="site"'),'Canaux accessibles dans le formulaire');
-assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Cache PWA mobile renouvelé');
+assert.ok(sw.includes('mailotion-crm-v21-m011-visible-calls'),'Cache PWA mobile renouvelé');
 
 
 // M009 — une fiche boutique accessible directement dans toute tâche (appel, email, newsletter).
@@ -265,6 +265,6 @@ assert.ok(exampleCall.includes('Récapitulatif de l’appel'),'Résumé téléph
 assert.ok(exampleCall.includes('Savons solides'),'Contexte réel visible dans le panneau');
 assert.ok(exampleCall.includes('Appeler ↗')&&exampleCall.includes('Voir la boutique ↗'),'Un clic téléphone et un clic boutique conservés');
 assert.ok(exampleCall.includes('tel:0628204002'),'Numéro professionnel joignable');
-assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Version cache testée après déploiement');
+assert.ok(sw.includes('mailotion-crm-v21-m011-visible-calls'),'Version cache testée après déploiement');
 
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
