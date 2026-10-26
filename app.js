@@ -123,6 +123,7 @@ function sanitize(raw,source='local'){
  email:txt(get(raw,['email','mail','courriel','email_professionnel']),240),
  phone:txt(get(raw,['phone','tel','telephone','téléphone','numero']),55),
  contact:txt(get(raw,['contact','interlocuteur','contact_nom','responsable']),130),
+ callCampaign:txt(get(raw,['callCampaign','campagne_appel']),90), callAngle:txt(get(raw,['callAngle','call_angle']),500),
  sourceUrl:txt(get(raw,['sourceUrl','source_url','source','url_source']),320),
  stage:stageFor(get(raw,['stage','statut','etape'])),
  followup:isoDate(get(raw,['followup','relance','date_relance'])),
@@ -165,7 +166,7 @@ function mergeContacts(input,origin,withUpdates=false){
    const existing=findMatch(r);
    if((state.deleted.includes(r.id))||existing&&state.deleted.includes(existing.id)){ignored++;continue}
    if(existing){found++;if(withUpdates&&origin==='github'){
-    for(const f of ['email','phone','website','sourceUrl','sector','city','contact'])if(!existing[f]&&r[f]&&!(f==='email'&&existing.emailStatus==='invalide'))existing[f]=r[f];
+    for(const f of ['email','phone','website','sourceUrl','sector','city','contact','callCampaign','callAngle'])if(!existing[f]&&r[f]&&!(f==='email'&&existing.emailStatus==='invalide'))existing[f]=r[f];
     existing.origin=existing.origin==='local'?'local':'github';
    }continue}
    if(origin==='github'){r.notes='';r.help='';r.offer='';r.lastContact='';r.followup='';r.stage='a_contacter'}

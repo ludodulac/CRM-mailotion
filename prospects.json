@@ -103,6 +103,237 @@
       "telephone": "",
       "site": "https://tasha.fr",
       "source_url": "https://tasha.fr/pages/contact"
+    },
+    {
+      "id": "en-douce-heure",
+      "boutique": "En Douce Heure",
+      "ville": "Vélines",
+      "secteur": "Savons artisanaux, soin du corps, boutique en ligne",
+      "telephone": "06 28 20 40 02",
+      "site": "https://endouceheure.fr/",
+      "source_url": "https://endouceheure.fr/contact-us/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseil après achat puis proposition de réachat, si ce parcours n'existe pas déjà."
+    },
+    {
+      "id": "savons-orely",
+      "boutique": "Les Savons d'Orély",
+      "ville": "Saint-Pierre-en-Auge",
+      "secteur": "Savons artisanaux et boutique en ligne",
+      "telephone": "06 78 34 14 73",
+      "site": "https://www.savons-orely.net/",
+      "source_url": "https://www.savons-orely.net/conditions",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Une aide de sélection des produits suivie de conseils d'usage, si pertinent."
+    },
+    {
+      "id": "petite-fabrique-hermitoise",
+      "boutique": "La Petite Fabrique Hermitoise",
+      "ville": "Les Hermites",
+      "secteur": "Savons artisanaux, cosmétique naturelle et boutique",
+      "telephone": "06 77 66 83 52",
+      "site": "https://www.lapetitefabriquedusavon.com/",
+      "source_url": "https://www.lapetitefabriquedusavon.com/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils de conservation et réachat de savons, à valider."
+    },
+    {
+      "id": "savonnerie-fleurs-de-sel",
+      "boutique": "Savonnerie Fleurs de Sel",
+      "ville": "Guérande",
+      "secteur": "Savonnerie et vente en ligne",
+      "telephone": "06 61 19 01 48",
+      "site": "https://www.savonneriefleursdesel.com/",
+      "source_url": "https://www.savonneriefleursdesel.com/conditions-generales",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Séquence courte de conseils après achat, à discuter."
+    },
+    {
+      "id": "bulle-de-malice",
+      "boutique": "Bulle de m'Alice",
+      "ville": "Bissey-sous-Cruchaud",
+      "secteur": "Savons artisanaux et cosmétiques",
+      "telephone": "06 83 97 49 87",
+      "site": "https://www.bulledemalice.fr/",
+      "source_url": "https://www.bulledemalice.fr/ou-nous-trouver/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Accompagnement après commande puis réachat, sans supposer l'absence de parcours."
+    },
+    {
+      "id": "savonnerie-a-fleur-de-peau",
+      "boutique": "La Savonnerie à Fleur de Peau",
+      "ville": "Porchères",
+      "secteur": "Savonnerie artisanale et boutique en ligne",
+      "telephone": "06 86 11 17 59",
+      "site": "https://www.lasavonnerieafleurdepeau.fr/",
+      "source_url": "https://www.lasavonnerieafleurdepeau.fr/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils de soins et de bon usage, selon produits."
+    },
+    {
+      "id": "savonnerie-olive-coco",
+      "boutique": "Savonnerie Olive & Coco",
+      "ville": "Nivillac",
+      "secteur": "Savons et soins solides artisanaux",
+      "telephone": "06 46 18 07 38",
+      "site": "https://savonnerie-oliveetcoco.com/",
+      "source_url": "https://savonnerie-oliveetcoco.com/contact/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils d'usage de soins solides et achat récurrent."
+    },
+    {
+      "id": "savonnerie-barbotine",
+      "boutique": "Savonnerie Barbotine",
+      "ville": "Hauteville-Lompnes",
+      "secteur": "Savons artisanaux, cosmétiques et e-commerce",
+      "telephone": "06 79 64 30 17",
+      "site": "https://www.barbotine.info/",
+      "source_url": "https://www.barbotine.info/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils après achat et segmentation savon/shampoing, selon besoins réels."
+    },
+    {
+      "id": "bulles-en-blok",
+      "boutique": "Bulles en Blok",
+      "ville": "Surzur",
+      "secteur": "Savonnerie artisanale Morbihan, vente en ligne",
+      "telephone": "06 08 03 74 50",
+      "site": "https://www.bullesenblok.fr/",
+      "source_url": "https://www.bullesenblok.fr/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Rituel après-achat et réachat adapté au consommable."
+    },
+    {
+      "id": "mouthy-savonnerie",
+      "boutique": "MOUTHY Savonnerie & Cosmétiques",
+      "ville": "Dunkerque",
+      "secteur": "Savons et cosmétiques naturels",
+      "telephone": "06 59 91 93 09",
+      "site": "https://mouthy.fr/",
+      "source_url": "https://mouthy.fr/contact/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils d'usage ciblés puis réachat éventuel."
+    },
+    {
+      "id": "ti-zao",
+      "boutique": "Ti Zao",
+      "ville": "Trégunc",
+      "secteur": "Savons et baumes naturels, e-commerce",
+      "telephone": "06 98 73 86 20",
+      "site": "https://tizao.bzh/",
+      "source_url": "https://tizao.bzh/boutique/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils post-achat et deuxième achat, si flux non déjà présent."
+    },
+    {
+      "id": "le-savon-breton",
+      "boutique": "Le Savon Breton",
+      "ville": "Saint-Brieuc-des-Iffs",
+      "secteur": "Savons et cosmétiques artisanaux, e-commerce",
+      "telephone": "06 84 77 58 68",
+      "site": "https://www.lesavonbreton.fr/",
+      "source_url": "https://www.intramuros.org/saint-brieuc-des-iffs/commerces/204183",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Rappel utile de conservation et réachat produit consommable."
+    },
+    {
+      "id": "totem-savon",
+      "boutique": "Totem Savon",
+      "ville": "Feins",
+      "secteur": "Savons artisanaux, cosmétiques et ménage",
+      "telephone": "06 70 10 02 46",
+      "site": "https://totemsavon.fr/",
+      "source_url": "https://totemsavon.fr/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Éducation à l'usage des savons ménagers puis réachat, si utile."
+    },
+    {
+      "id": "bulles-de-breizh",
+      "boutique": "Bulles de Breizh",
+      "ville": "Monterblanc",
+      "secteur": "Savonnerie bretonne et boutique en ligne",
+      "telephone": "06 82 05 25 37",
+      "site": "https://bullesdebreizh.fr/",
+      "source_url": "https://bullesdebreizh.fr/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils et réachat adaptés au rythme de commande."
+    },
+    {
+      "id": "lazuli-cosmetiques",
+      "boutique": "Lazuli Cosmétiques",
+      "ville": "Quimper",
+      "secteur": "Savonnerie artisanale et e-commerce",
+      "telephone": "06 12 31 22 24",
+      "site": "https://lazuli-cosmetiques.fr/",
+      "source_url": "https://lazuli-cosmetiques.fr/pages/contact",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Après-achat conseil produit ; éventuel réachat selon clientèle."
+    },
+    {
+      "id": "savonnerie-yanaelle",
+      "boutique": "Savonnerie Yanaëlle",
+      "ville": "Bessenay",
+      "secteur": "Savons artisanaux et cosmétiques, boutique en ligne",
+      "telephone": "07 61 00 94 94",
+      "site": "https://savonnerie-yanaelle.com/",
+      "source_url": "https://savonnerie-yanaelle.com/boutique-en-ligne/savon-artisanal/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Parcours après achat : conservation, usage et renouvellement."
+    },
+    {
+      "id": "douceurs-haut-couesnon",
+      "boutique": "Les Douceurs du Haut Couesnon",
+      "ville": "Ille-et-Vilaine",
+      "secteur": "Miels artisanaux et savons au miel, vente en ligne",
+      "telephone": "06 70 39 37 22",
+      "site": "https://lesdouceursduhautcouesnon.com/",
+      "source_url": "https://lesdouceursduhautcouesnon.com/contact",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils d'usage et réachat entre savons et miels, si adaptés."
+    },
+    {
+      "id": "fabulleuse-savonnerie",
+      "boutique": "La Fabulleuse Savonnerie",
+      "ville": "Saintes",
+      "secteur": "Savons artisanaux saisonniers et e-commerce",
+      "telephone": "06 08 88 60 07",
+      "site": "https://savonnerie-fabulleuse.fr/",
+      "source_url": "https://www.saintes-tourisme.fr/fiche-sit/la-fabulleuse-savonnerie-atelier-boutique-6391745/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Rappel de découverte des gammes saisonnières ou entretien après achat."
+    },
+    {
+      "id": "savonnerie-perles-du-lac",
+      "boutique": "Les Perles du Lac",
+      "ville": "Mittersheim",
+      "secteur": "Savons, déodorants et baumes artisanaux, boutique en ligne",
+      "telephone": "06 87 47 43 05",
+      "site": "https://savonslesperlesdulac.com/",
+      "source_url": "https://savonslesperlesdulac.com/mentions-legales/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils d'usage puis parcours de réachat selon catégorie."
+    },
+    {
+      "id": "savonnerie-elise",
+      "boutique": "Savonnerie Élise",
+      "ville": "Saint-Clément-les-Places",
+      "secteur": "Savons et cosmétiques biologiques, boutique en ligne",
+      "telephone": "06 69 00 20 13",
+      "site": "https://savonnerie-elise.com/",
+      "source_url": "https://www.montsdulyonnaistourisme.fr/commerce-et-service/savonnerie-elise-saint-clement-les-places/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Parcours conseils pour nouveaux acheteurs de savons, suivi de réachat."
+    },
+    {
+      "id": "sevonnerie",
+      "boutique": "Sévonnerie",
+      "ville": "Saint-Nicolas-de-la-Taille",
+      "secteur": "Savons et shampoings naturels artisanaux, expédition",
+      "telephone": "06 19 48 36 17",
+      "site": "https://www.sevonnerie.fr/",
+      "source_url": "https://www.normandie-tourisme.fr/commerce/sevonnerie/",
+      "campagne_appel": "savonneries-2026-10",
+      "call_angle": "Conseils d'usage après expédition et réachat si e-commerce actif."
     }
   ]
 }
