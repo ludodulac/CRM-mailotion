@@ -1,4 +1,4 @@
-const CACHE='mailotion-crm-v21-m011-visible-calls';
+const CACHE='mailotion-crm-v22-m012-newsletter-audit';
 const CORE=['./','./index.html','./style.css','./app.js','./crm-cloud.js','./outreach.js','./simple.js','./simple.css','./task-inbox.js','./diagnostic.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./prospects.json'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
