@@ -1,4 +1,4 @@
-const CACHE='mailotion-crm-v17-m007-diagnostic';
+const CACHE='mailotion-crm-v18-m008-newsletter-links';
 const CORE=['./','./index.html','./style.css','./app.js','./crm-cloud.js','./outreach.js','./simple.js','./simple.css','./task-inbox.js','./diagnostic.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./prospects.json'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
