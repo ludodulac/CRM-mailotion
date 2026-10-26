@@ -144,7 +144,7 @@ assert.ok(safeCard.includes('&lt;script&gt;'),'Réponse échappée');
 assert.ok(!safeCard.includes('<iframe>')&&!safeCard.includes('<script>'),'Aucune injection HTML');
 assert.ok(safeCard.includes('<details'),'Aide fermée par défaut');
 assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
-assert.ok(sw.includes('mailotion-crm-v17-m007-diagnostic'),'Cache Android incrémenté et valide');
+assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Cache Android incrémenté et valide');
 assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
 
 // M007 — questions par boutique, données privées, non supposées à l'avance.
@@ -154,7 +154,7 @@ for(const id of ['diagnosticLaunch','diagnosticDialog','diagnosticProspect','dia
  assert.ok(ids.includes(id),'Élément diagnostic présent : '+id);
 assert.ok(html.includes('src="./diagnostic.js"'),'Nouvel écran diagnostique chargé');
 assert.ok(sw.includes("'./diagnostic.js'"),'Diagnostic préchargé pour usage hors ligne');
-assert.ok(sw.includes('mailotion-crm-v17-m007-diagnostic'),'Le cache PWA mobile est renouvelé');
+assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Le cache PWA mobile est renouvelé');
 assert.ok(app.includes('data-diagnostic-prospect'),'Accès depuis chaque fiche boutique');
 assert.ok(inbox.includes('data-diag-prospect'),'Accès depuis la tâche téléphonique');
 assert.ok(cloud.includes('saveDiagnostic')&&cloud.includes('getDiagnostic'),'Accès aux enregistrements privés');
