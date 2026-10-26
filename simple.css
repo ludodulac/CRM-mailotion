@@ -169,3 +169,7 @@ body.crm-simple .topline{margin-bottom:7px}
  .inbox-header-actions{gap:5px}
  #diagnosticLaunch{font-size:12px}
 }
+
+/* M010 — séance d’appels dédiée : bouton distinct et lisible sur téléphone. */
+#taskInboxCalls[aria-pressed="true"]{background:#6540b3;color:#fff;border-color:#6540b3}
+@media(max-width:590px){#taskInboxCalls{font-size:12px;min-height:39px;padding:8px 10px}}
