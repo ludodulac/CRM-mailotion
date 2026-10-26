@@ -73,6 +73,11 @@ body.crm-simple .hero{padding-top:13px}
 .inbox-check input{width:21px;height:21px;accent-color:#248245;cursor:pointer;margin:0}
 .inbox-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .inbox-meta span{font-size:12px;color:#665a72;background:#f1edf6;border-radius:7px;padding:5px 7px;overflow-wrap:anywhere}
+/* Le site est toujours accessible au début d'une tâche, avant le long message. */
+.inbox-site-link{margin:9px 0 0}
+.inbox-site-link a{display:inline-flex;align-items:center;gap:5px;min-height:42px;border-radius:9px;padding:9px 12px;border:1px solid #dcd0ed;background:#f3edff;color:#5e3995;font-size:13px;font-weight:800;text-decoration:none}
+.inbox-site-link a:hover,.inbox-site-link a:focus-visible{background:#e9dfff;text-decoration:underline}
+.inbox-site-missing{margin:9px 0 0;color:#75677d;font-size:12px}
 .inbox-message{margin-top:12px;background:#fff;border:1px solid #ebe5ed;border-radius:10px;padding:13px;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
 .inbox-task-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
 .inbox-task-actions button,.inbox-task-actions a{border:1px solid #dcd0ed;border-radius:9px;background:#fff;color:#6040a0;min-height:42px;padding:10px 12px;font-size:12px;font-weight:790;display:inline-flex;align-items:center;justify-content:center;text-align:center}
