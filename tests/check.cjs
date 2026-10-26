@@ -144,7 +144,7 @@ assert.ok(safeCard.includes('&lt;script&gt;'),'Réponse échappée');
 assert.ok(!safeCard.includes('<iframe>')&&!safeCard.includes('<script>'),'Aucune injection HTML');
 assert.ok(safeCard.includes('<details'),'Aide fermée par défaut');
 assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
-assert.ok(sw.includes('mailotion-crm-v19-m009-site-in-tasks'),'Cache Android incrémenté et valide');
+assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Cache Android incrémenté et valide');
 assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
 
 // M007 — questions par boutique, données privées, non supposées à l'avance.
@@ -154,7 +154,7 @@ for(const id of ['diagnosticLaunch','diagnosticDialog','diagnosticProspect','dia
  assert.ok(ids.includes(id),'Élément diagnostic présent : '+id);
 assert.ok(html.includes('src="./diagnostic.js"'),'Nouvel écran diagnostique chargé');
 assert.ok(sw.includes("'./diagnostic.js'"),'Diagnostic préchargé pour usage hors ligne');
-assert.ok(sw.includes('mailotion-crm-v19-m009-site-in-tasks'),'Le cache PWA mobile est renouvelé');
+assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Le cache PWA mobile est renouvelé');
 assert.ok(app.includes('data-diagnostic-prospect'),'Accès depuis chaque fiche boutique');
 assert.ok(inbox.includes('data-diag-prospect'),'Accès depuis la tâche téléphonique');
 assert.ok(cloud.includes('saveDiagnostic')&&cloud.includes('getDiagnostic'),'Accès aux enregistrements privés');
@@ -198,7 +198,7 @@ const unknownSignup=api.clean('Actions',{id:'website',prospectId:'p',channel:'si
 assert.ok(inboxApi.card(unknownSignup,new Map()).includes('Voir le site ↗'),'Formulaire non confirmé : étiquette distincte');
 assert.ok(inbox.includes('data-inbox-expand'),'Bouton Voir toutes les tâches présent');
 assert.ok(html.includes('value="newsletter"')&&html.includes('value="site"'),'Canaux accessibles dans le formulaire');
-assert.ok(sw.includes('mailotion-crm-v19-m009-site-in-tasks'),'Cache PWA mobile renouvelé');
+assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Cache PWA mobile renouvelé');
 
 
 // M009 — une fiche boutique accessible directement dans toute tâche (appel, email, newsletter).
@@ -231,5 +231,20 @@ const fallbackSite=inboxApi.card({
 },new Map([['fallback',{name:'Boutique'}]]));
 assert.ok(fallbackSite.includes('href="https://boutique-exemple.fr/"'),'Repli sûr sur le lien existant');
 assert.ok(simpleCss.includes('.inbox-site-link{'),'Lien adapté à la lecture mobile');
+
+
+// M010 — Appels : vue filtrée, tous les numéros visibles, résumé dépliable par boutique.
+assert.ok(html.includes('id="taskInboxCalls"'),'Bouton « Mes appels » accessible sur l’accueil');
+assert.ok(inbox.includes("a.channel==='telephone'?'📞 Récapitulatif de l’appel'"),'Le résumé remplace le texte long sur les appels');
+assert.ok(inbox.includes("todo=all.filter(a=>!callsOnly||a.channel==='telephone')"),'Filtre d’appel séparé des newsletters et autres tâches');
+assert.ok(inbox.includes("expanded||callsOnly?todo:todo.slice(0,8)"),'Tous les appels de la session affichés');
+assert.ok(inbox.includes("$('taskInboxCalls')?.addEventListener"),'Bascule appels/toutes les tâches');
+assert.ok(simpleCss.includes('#taskInboxCalls[aria-pressed="true"]'),'État de séance visible sur Android');
+const exampleCall=inboxApi.card({id:'new-call',prospectId:'p',type:'appel',channel:'telephone',recipient:'06 28 20 40 02',callGuide:[{q:'Pourquoi ?',a:'Savons solides'}]},new Map([['p',{name:'Savonnerie',website:'https://exemple.fr'}]]));
+assert.ok(exampleCall.includes('Récapitulatif de l’appel'),'Résumé téléphonique de la boutique');
+assert.ok(exampleCall.includes('Savons solides'),'Contexte réel visible dans le panneau');
+assert.ok(exampleCall.includes('Appeler ↗')&&exampleCall.includes('Voir la boutique ↗'),'Un clic téléphone et un clic boutique conservés');
+assert.ok(exampleCall.includes('tel:0628204002'),'Numéro professionnel joignable');
+assert.ok(sw.includes('mailotion-crm-v20-m010-call-session'),'Version cache testée après déploiement');
 
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
