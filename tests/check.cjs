@@ -144,7 +144,7 @@ assert.ok(safeCard.includes('&lt;script&gt;'),'Réponse échappée');
 assert.ok(!safeCard.includes('<iframe>')&&!safeCard.includes('<script>'),'Aucune injection HTML');
 assert.ok(safeCard.includes('<details'),'Aide fermée par défaut');
 assert.ok(simpleCss.includes('.inbox-qa{'),'Aide lisible sur Android');
-assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Cache Android incrémenté et valide');
+assert.ok(sw.includes('mailotion-crm-v19-m009-site-in-tasks'),'Cache Android incrémenté et valide');
 assert.ok(cloud.includes('callGuide:old?.callGuide||[]'),'L’édition n’efface pas la fiche Q/R');
 
 // M007 — questions par boutique, données privées, non supposées à l'avance.
@@ -154,7 +154,7 @@ for(const id of ['diagnosticLaunch','diagnosticDialog','diagnosticProspect','dia
  assert.ok(ids.includes(id),'Élément diagnostic présent : '+id);
 assert.ok(html.includes('src="./diagnostic.js"'),'Nouvel écran diagnostique chargé');
 assert.ok(sw.includes("'./diagnostic.js'"),'Diagnostic préchargé pour usage hors ligne');
-assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Le cache PWA mobile est renouvelé');
+assert.ok(sw.includes('mailotion-crm-v19-m009-site-in-tasks'),'Le cache PWA mobile est renouvelé');
 assert.ok(app.includes('data-diagnostic-prospect'),'Accès depuis chaque fiche boutique');
 assert.ok(inbox.includes('data-diag-prospect'),'Accès depuis la tâche téléphonique');
 assert.ok(cloud.includes('saveDiagnostic')&&cloud.includes('getDiagnostic'),'Accès aux enregistrements privés');
@@ -198,6 +198,38 @@ const unknownSignup=api.clean('Actions',{id:'website',prospectId:'p',channel:'si
 assert.ok(inboxApi.card(unknownSignup,new Map()).includes('Voir le site ↗'),'Formulaire non confirmé : étiquette distincte');
 assert.ok(inbox.includes('data-inbox-expand'),'Bouton Voir toutes les tâches présent');
 assert.ok(html.includes('value="newsletter"')&&html.includes('value="site"'),'Canaux accessibles dans le formulaire');
-assert.ok(sw.includes('mailotion-crm-v18-m008-newsletter-links'),'Cache PWA mobile renouvelé');
+assert.ok(sw.includes('mailotion-crm-v19-m009-site-in-tasks'),'Cache PWA mobile renouvelé');
+
+
+// M009 — une fiche boutique accessible directement dans toute tâche (appel, email, newsletter).
+const knownSite={name:'Chic des Plantes !',website:'https://www.chicdesplantes.fr/'};
+const callSiteCard=inboxApi.card({
+ id:'chic-call',prospectId:'chic-des-plantes',channel:'telephone',
+ recipient:'01 81 80 15 80',description:'Appeler Chic des Plantes',
+ message:'Bonjour, je voudrais parler au responsable.'
+},new Map([['chic-des-plantes',knownSite]]));
+assert.ok(callSiteCard.includes('href="https://www.chicdesplantes.fr/"'),'Site officiel dans le rendez-vous Chic');
+assert.ok(callSiteCard.includes('🌐 Voir la boutique ↗'),'Lien visite visible dans la tâche');
+assert.ok(callSiteCard.indexOf('🌐 Voir la boutique')<callSiteCard.indexOf('Bonjour, je voudrais parler'),
+ 'Site au-dessus du long discours pour une consultation rapide');
+assert.ok(callSiteCard.includes('target="_blank" rel="noopener noreferrer"'),'Site s’ouvre séparément');
+assert.ok(inboxApi.card({
+ id:'test-mail',prospectId:'chic-des-plantes',channel:'email',recipient:'test@example.org'
+},new Map([['chic-des-plantes',knownSite]])).includes('Voir la boutique'),
+ 'Le lien existe aussi dans les tâches email');
+const missingSite=inboxApi.card({
+ id:'missing',prospectId:'missing',channel:'telephone',recipient:'01 01 01 01 01'
+},new Map([['missing',{email:'hello@example.com'}]]));
+assert.ok(missingSite.includes('Site de la boutique à renseigner'),'Ne pas inventer de site depuis l’email');
+assert.ok(!missingSite.includes('href="https://example.com"'),'Pas de domaine déduit de l’adresse email');
+const unsafeSite=inboxApi.card({
+ id:'unsafe',prospectId:'unsafe',channel:'telephone'
+},new Map([['unsafe',{website:'javascript:alert(1)'}]]));
+assert.ok(!unsafeSite.includes('href="javascript:'),'URL dangereuse bloquée');
+const fallbackSite=inboxApi.card({
+ id:'fallback',prospectId:'fallback',channel:'newsletter',recipient:'https://boutique-exemple.fr/'
+},new Map([['fallback',{name:'Boutique'}]]));
+assert.ok(fallbackSite.includes('href="https://boutique-exemple.fr/"'),'Repli sûr sur le lien existant');
+assert.ok(simpleCss.includes('.inbox-site-link{'),'Lien adapté à la lecture mobile');
 
 console.log('PASS - scripts, UI, 11 contacts publics, brouillons complets, Gmail manuel, sécurité, merge, conflits, dédoublonnage et schéma Sheets.');
