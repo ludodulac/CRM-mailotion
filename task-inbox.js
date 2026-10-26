@@ -52,7 +52,7 @@ function card(a,lookup){
  const p=lookup.get(a.prospectId),to=recipient(a,p),url=link(a,to),site=boutiqueLink(a,p);
  const message=String(a.message||'');
  const qa=Array.isArray(a.callGuide)?a.callGuide.slice(0,15).filter(x=>x?.q&&x?.a):[];
- const aide=qa.length?'<details class="inbox-qa"><summary>❓ Questions / réponses pendant l’appel</summary>'+
+ const aide=qa.length?'<details class="inbox-qa"><summary>'+(a.channel==='telephone'?'📞 Récapitulatif de l’appel':'❓ Questions / réponses pendant l’appel')+'</summary>'+
    '<div class="inbox-qa-content">'+qa.map(x=>'<div class="inbox-qa-item"><b>'+esc(x.q)+'</b><p>'+esc(x.a)+'</p></div>').join('')+'</div></details>':'';
  const date=dayLabel(a.due||'');
  const target=(p?.name||'Boutique')+(p?.contact?' · '+p.contact:'');
@@ -71,23 +71,26 @@ function card(a,lookup){
    (a.channel==='telephone'?'<button type="button" data-diag-prospect="'+esc(a.prospectId)+'">☑ Questions à cocher</button>':'')+
    '<button type="button" data-inbox-edit="'+esc(a.id)+'">Modifier</button></div></article>';
 }
-let expanded=false;
+let expanded=false,callsOnly=false;
 function render(){
  const host=$('taskInboxList');if(!host)return;
  const leads=new Map((window.MailotionCRM?.state?.records||[]).map(p=>[p.id,p]));
  const cloud=window.MailotionCloud;
- const todo=(cloud?.getActions?.()||[]).filter(active).sort((a,b)=>{
+ const all=(cloud?.getActions?.()||[]).filter(active);
+ const todo=all.filter(a=>!callsOnly||a.channel==='telephone').sort((a,b)=>{
   const da=a.due||'9999-12-31',db=b.due||'9999-12-31';
   return da.localeCompare(db)||(a.createdAt||'').localeCompare(b.createdAt||'');
  });
  const count=$('taskInboxCount');if(count)count.textContent=String(todo.length);
- const shown=expanded?todo:todo.slice(0,8);
+ const calls=all.filter(a=>a.channel==='telephone').length;
+ const callsButton=$('taskInboxCalls');if(callsButton){callsButton.hidden=calls===0;callsButton.textContent=callsOnly?'☰ Toutes les tâches':'📞 Mes appels ('+calls+')';callsButton.setAttribute('aria-pressed',String(callsOnly));}
+ const shown=expanded||callsOnly?todo:todo.slice(0,8);
  const connected=cloud?.status?.().connected===true;
  const connect=$('inboxConnect');if(connect)connect.hidden=connected;
  const note=!connected?'<div class="inbox-sync-hint">↻ Connecte Google pour retrouver les tâches enregistrées par ChatGPT.</div>':'';
  host.innerHTML=note+(shown.length?shown.map(a=>card(a,leads)).join(''):
  '<div class="inbox-empty">'+(connected?'✓ Rien à faire pour le moment.':'Tes tâches apparaîtront ici après synchronisation.')+'</div>')+
- (todo.length>8?'<button type="button" class="inbox-more" data-inbox-expand="1">'+(expanded?'Réduire la liste':'Voir toutes les tâches ('+todo.length+')')+'</button>':'');
+ (todo.length>8&&!callsOnly?'<button type="button" class="inbox-more" data-inbox-expand="1">'+(expanded?'Réduire la liste':'Voir toutes les tâches ('+todo.length+')')+'</button>':'');
 }
 async function copyText(s){
  if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(s);return true}catch{}}
@@ -96,6 +99,7 @@ async function copyText(s){
 }
 function init(){
  $('taskInboxRefresh')?.addEventListener('click',()=>window.MailotionCloud?.sync?.());
+ $('taskInboxCalls')?.addEventListener('click',()=>{callsOnly=!callsOnly;expanded=false;render();});
  $('inboxConnect')?.addEventListener('click',()=>document.getElementById('cloudConnect')?.click());
  $('taskInboxList')?.addEventListener('click',async event=>{
   const b=event.target.closest('button');if(!b)return;
