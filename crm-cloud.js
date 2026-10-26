@@ -99,7 +99,7 @@ function values(table,item){
  return [item.id,item.prospectId||'',item.email||'',item.status||'',item.active?'oui':'non',item.verifiedAt||'',j];
 }
 async function fetchAll(){
- const qs=['Prospects!A2:G4000','Actions!A2:H5000','Emails!A2:G5000'].map(r=>'ranges='+encodeURIComponent(r)).join('&');
+ const qs=['Prospects!A2:G','Actions!A2:H','Emails!A2:G'].map(r=>'ranges='+encodeURIComponent(r)).join('&');
  const response=await request(baseURL()+'/values:batchGet?'+qs);
  const result={Prospects:new Map(),Actions:new Map(),Emails:new Map()};
  for(const [n,table] of Object.keys(result).entries()){
@@ -228,6 +228,32 @@ function scheduleCloud(){
  showCloud('● Enregistrement des changements dans Google en attente…');
  clearTimeout(timer);timer=setTimeout(()=>syncCloud(),1250);
 }
+// Une fiche de campagne publiée est immédiatement exploitable sur Android, même
+// sans autorisation Google. Les vrais résultats restent exclusivement privés.
+// Identifiants identiques aux Actions du Sheets : pas de doublons à la synchro.
+function seedPublicCallTasks(){
+ const listed=new Set(state.actions.map(a=>a.id));
+ const stamp=new Date().toISOString();
+ let added=0;
+ for(const p of api().state.records){
+  if(p.callCampaign!=='savonneries-2026-10'||!p.phone||p.archived||p.stage==='sans_suite')continue;
+  const id='call-20261026-'+p.id;
+  if(listed.has(id))continue;
+  const a={id,prospectId:p.id,date:'2026-10-26',due:'',type:'appel',
+    status:'a_faire',description:'Appeler '+p.name+' — session savonneries',
+    next:'Noter le résultat réel après avoir composé le numéro. En cas de refus, ne pas recontacter.',
+    channel:'telephone',recipient:p.phone,message:'',
+    callGuide:[
+      {q:'Pourquoi cette boutique ?',a:'Savonnerie artisanale e-commerce : consulter le site officiel avant l’appel.'},
+      {q:'Une piste à vérifier',a:p.callAngle||'Conseils après achat ou réachat, uniquement si besoin confirmé.'},
+      {q:'Objectif',a:'Proposer un échange de 15 minutes si pertinent, sans inventer de résultats.'}
+    ],
+    completedAt:'',createdAt:stamp,updatedAt:stamp};
+  state.actions.push(a);listed.add(id);added++;
+ }
+ if(added)saveLocal();
+ return added;
+}
 function trackLocal(){
  if(state.applying)return;
  const before=state.lastUi;
@@ -245,6 +271,7 @@ function trackLocal(){
    saveLocal();
   }
  }
+ const seeded=seedPublicCallTasks();
  snapshot();renderToday();scheduleCloud();
 }
 function getProspect(id){return api().state.records.find(x=>x.id===id)}
@@ -479,7 +506,7 @@ function init(){
  loadLocal();
  // Immutable snapshot before importing external records; optional disaster recovery.
  if(!localStorage.getItem(MIG)){try{localStorage.setItem(MIG,JSON.stringify({records:api().state.records,deleted:api().state.deleted,actions:state.actions,emails:state.emails,at:new Date().toISOString()}))}catch{}}
- snapshot();addUIEvents();renderToday();
+ seedPublicCallTasks();snapshot();addUIEvents();renderToday();
  if(state.client&&state.sheet)showCloud('Connexion privée configurée, appuie sur « Connecter Google » pour synchroniser.');
  else showCloud('Non connectée. Tes fiches actuelles restent sur ce téléphone, sans suppression.');
  window.MailotionCloud={sync:connect,status:()=>({connected:state.connected,sheetConfigured:!!state.sheet}),getActions:()=>clone(state.actions),getEmails:()=>clone(state.emails),getDiagnostic,saveDiagnostic,markTaskDone,editTask:openAction,refreshTasks:renderToday,recordOutreachSent};
